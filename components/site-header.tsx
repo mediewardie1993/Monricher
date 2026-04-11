@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { navItems } from "@/lib/site-data";
+import { SiteLogo } from "@/components/site-logo";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -24,16 +25,8 @@ export function SiteHeader() {
     >
       <div className="container-shell">
         <div className="flex items-center justify-between gap-4 py-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-glow">
-              <div className="h-6 w-6 rounded-md border border-white/30" />
-            </div>
-            <div>
-              <p className="font-display text-base font-bold tracking-[0.08em] text-white">
-                MONRICHER
-              </p>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted">Construction</p>
-            </div>
+          <Link href="/" className="block">
+            <SiteLogo className="h-auto w-full max-w-[17rem] md:max-w-[21rem]" />
           </Link>
 
           <nav className="hidden items-center gap-8 lg:flex">

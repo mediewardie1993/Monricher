@@ -1,3 +1,5 @@
+import { SiteLogo } from "@/components/site-logo";
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.08))] py-14">
@@ -21,7 +23,7 @@ export function SiteFooter() {
 
         <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-4">
-            <p className="font-display text-lg font-bold tracking-[0.08em] text-white">MONRICHER</p>
+            <SiteLogo className="h-auto w-full max-w-[18rem]" />
             <p className="max-w-sm text-sm leading-7 text-muted">
               Premium construction, renovation, and fit-out services delivered with clarity,
               organization, and a refined modern standard.
@@ -39,9 +41,9 @@ export function SiteFooter() {
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-200">Contact</h3>
             <div className="grid gap-2 text-sm text-muted">
-              <p>+234 800 000 0000</p>
-              <p>info@monricherconstruction.com</p>
-              <p>14 Admiralty Way, Lekki Phase 1, Lagos</p>
+              <p>+639-xxxxxxxxxx</p>
+              <p>info@MRconstruction.com</p>
+              <p>Caloocan City, Metro Manila</p>
             </div>
           </div>
           <div className="space-y-3">

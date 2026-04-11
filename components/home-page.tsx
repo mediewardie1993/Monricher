@@ -286,8 +286,8 @@ export function HomePage() {
                 </label>
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                   <div className="text-sm leading-7 text-muted">
-                    <p>Phone: +234 800 000 0000</p>
-                    <p>Email: info@monricherconstruction.com</p>
+                    <p>Phone: +639-xxxxxxxxxx</p>
+                    <p>Email: info@MRconstruction.com</p>
                   </div>
                   <button type="submit" className="button-primary">
                     Request Consultation

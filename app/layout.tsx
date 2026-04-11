@@ -13,9 +13,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Monricher Construction | Template 2",
+  title: "Monricher Construction and Development Corp",
   description:
-    "Modern premium construction company website template for Monricher Construction."
+    "Premium construction, renovation, and fit-out website for Monricher Construction and Development Corp."
 };
 
 export default function RootLayout({
