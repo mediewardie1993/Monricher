@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(114, 180, 255, 0.14), transparent 24%),
+    radial-gradient(circle at top right, rgba(200, 169, 106, 0.12), transparent 18%),
+    linear-gradient(180deg, #09111c 0%, #0a1320 100%);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body), sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), sans-serif;
+  }
+}
+
+@layer components {
+  .container-shell {
+    @apply mx-auto w-[min(1180px,calc(100%-1.5rem))];
+  }
+
+  .section-space {
+    @apply py-20 md:py-28;
+  }
+
+  .glass-panel {
+    @apply border border-line bg-white/[0.04] shadow-soft backdrop-blur-md;
+  }
+
+  .section-kicker {
+    @apply mb-4 inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em] text-slate-200;
+  }
+
+  .section-kicker::before {
+    content: "";
+    @apply h-px w-10 bg-gradient-to-r from-accentSoft to-white/30;
+  }
+
+  .button-primary {
+    @apply inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 py-3 font-extrabold text-slate-950 transition duration-300 hover:-translate-y-0.5 hover:shadow-glow;
+  }
+
+  .button-gold-sweep {
+    @apply relative inline-flex min-h-12 items-center justify-center overflow-hidden rounded-full border border-accent/40 bg-white/[0.03] px-6 py-3 font-bold text-white transition duration-300;
+  }
+
+  .button-gold-sweep::before {
+    content: "";
+    @apply absolute inset-0 rounded-full bg-[linear-gradient(135deg,#c7772d_0%,#f0a85b_54%,#ffd3a2_100%)] opacity-0 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)];
+    transform: translateX(-108%);
+  }
+
+  .button-gold-sweep > span {
+    @apply relative z-10 transition duration-300;
+  }
+
+  .button-gold-sweep:hover,
+  .button-gold-sweep:focus-visible {
+    @apply -translate-y-1 border-accent/60 shadow-glow;
+  }
+
+  .button-gold-sweep:hover::before,
+  .button-gold-sweep:focus-visible::before {
+    @apply opacity-100;
+    transform: translateX(0);
+  }
+
+  .button-gold-sweep:hover > span,
+  .button-gold-sweep:focus-visible > span {
+    @apply text-white;
+  }
+
+  .button-secondary {
+    @apply inline-flex min-h-12 items-center justify-center rounded-full border border-white/15 bg-white/[0.03] px-6 py-3 font-bold text-white transition duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-white/[0.08];
+  }
+}

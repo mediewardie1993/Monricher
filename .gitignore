@@ -1,0 +1,6 @@
+Template 2/node_modules/
+Template 2/.next/
+Template 2/out/
+*.log
+Thumbs.db
+.DS_Store
