@@ -1,10 +1,9 @@
 export const navItems = [
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Projects", href: "#projects" },
-  { label: "Why Us", href: "#why-us" },
-  { label: "Testimonials", href: "#testimonials" },
-  { label: "Contact", href: "#contact" }
+  { label: "Home", href: "/" },
+  { label: "Projects", href: "/projects" },
+  { label: "Services", href: "/services" },
+  { label: "Team", href: "/team" },
+  { label: "Contact", href: "/contact" }
 ];
 
 export const serviceItems = [

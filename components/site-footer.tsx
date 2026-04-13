@@ -1,5 +1,3 @@
-import { SiteLogo } from "@/components/site-logo";
-
 export function SiteFooter() {
   return (
     <footer className="border-t border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.08))] py-14">
@@ -11,19 +9,19 @@ export function SiteFooter() {
               Built to feel modern, dependable, and ready for serious clients.
             </h2>
           </div>
-          <div className="flex flex-wrap gap-4 lg:justify-end">
-            <a href="#contact" className="button-primary">
-              Get a Quote
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 lg:justify-end">
+            <a href="/contact" className="button-primary w-full sm:w-auto">
+              <span>Get a Quote</span>
             </a>
-            <a href="#services" className="button-secondary">
-              Our Services
+            <a href="/services" className="button-secondary w-full sm:w-auto">
+              <span>Our Services</span>
             </a>
           </div>
         </div>
 
         <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-4">
-            <SiteLogo className="h-auto w-full max-w-[18rem]" />
+            <div className="h-12 w-28 sm:w-40" aria-hidden="true" />
             <p className="max-w-sm text-sm leading-7 text-muted">
               Premium construction, renovation, and fit-out services delivered with clarity,
               organization, and a refined modern standard.
@@ -32,10 +30,11 @@ export function SiteFooter() {
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-200">Quick Links</h3>
             <div className="grid gap-2 text-sm text-muted">
-              <a href="#about">About</a>
-              <a href="#services">Services</a>
-              <a href="#projects">Projects</a>
-              <a href="#contact">Contact</a>
+              <a href="/">Home</a>
+              <a href="/projects">Projects</a>
+              <a href="/services">Services</a>
+              <a href="/team">Team</a>
+              <a href="/contact">Contact</a>
             </div>
           </div>
           <div className="space-y-3">

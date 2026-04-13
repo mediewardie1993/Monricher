@@ -41,6 +41,11 @@ const quickReplySeeds: Record<string, string> = {
 };
 
 const CTA_MESSAGE = "Would you like to request a quote?";
+const floatingDialogues = [
+  "How can I help you today?",
+  "Need a quick quote estimate?",
+  "Want to explore our services?"
+];
 
 const normalizeText = (value: string) =>
   value
@@ -87,6 +92,8 @@ export function ConstructionChatbot() {
   const [leadData, setLeadData] = useState<LeadData>(defaultLeadData);
   const [faqCount, setFaqCount] = useState(0);
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [showFloatingDialogue, setShowFloatingDialogue] = useState(true);
+  const [floatingDialogueIndex, setFloatingDialogueIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const typingTimerRef = useRef<number | null>(null);
 
@@ -150,6 +157,32 @@ export function ConstructionChatbot() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShowFloatingDialogue(false);
+      return;
+    }
+
+    if (prefersReducedMotion) {
+      setShowFloatingDialogue(true);
+      return;
+    }
+
+    setShowFloatingDialogue(true);
+    const initialHide = window.setTimeout(() => setShowFloatingDialogue(false), 15000);
+
+    const intervalId = window.setInterval(() => {
+      setFloatingDialogueIndex((current) => (current + 1) % floatingDialogues.length);
+      setShowFloatingDialogue(true);
+      window.setTimeout(() => setShowFloatingDialogue(false), 15000);
+    }, 30000);
+
+    return () => {
+      window.clearTimeout(initialHide);
+      window.clearInterval(intervalId);
+    };
+  }, [isOpen, prefersReducedMotion]);
 
   const queueAssistantReply = (content: string, callback?: () => void) => {
     setIsTyping(true);
@@ -225,7 +258,7 @@ export function ConstructionChatbot() {
     setFaqCount(nextFaqCount);
 
     if (shouldStartLeadCapture(value)) {
-      const intro = intent?.response ?? "We’d be glad to help with your inquiry.";
+      const intro = intent?.response ?? "We'd be glad to help with your inquiry.";
       queueAssistantReply(intro, beginLeadCapture);
       return;
     }
@@ -270,7 +303,7 @@ export function ConstructionChatbot() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="fixed bottom-4 right-4 z-50 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+      <div className="fixed bottom-3 right-3 z-50 flex max-w-[calc(100vw-1rem)] flex-col items-end gap-2.5 sm:bottom-6 sm:right-6 sm:max-w-[calc(100vw-1.5rem)] sm:gap-3">
         <AnimatePresence initial={false}>
           {isOpen ? (
             <motion.section
@@ -280,13 +313,13 @@ export function ConstructionChatbot() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.985 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
-              className="w-[min(24rem,calc(100vw-1rem))] overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/95 shadow-[0_30px_90px_rgba(2,6,18,0.48)] backdrop-blur-xl sm:w-[24rem]"
+              className="w-[calc(100vw-1rem)] overflow-hidden rounded-[24px] border border-white/10 bg-slate-950/95 shadow-[0_30px_90px_rgba(2,6,18,0.48)] backdrop-blur-xl sm:w-[24rem] sm:rounded-[28px]"
               aria-label={chatbotName}
             >
-              <div className="border-b border-white/10 bg-white/[0.03] px-5 py-4">
+              <div className="border-b border-white/10 bg-white/[0.03] px-4 py-4 sm:px-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+                    <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] sm:h-14 sm:w-14">
                       <Image
                         src="/assistant.png"
                         alt="Monricher Assistant"
@@ -299,8 +332,10 @@ export function ConstructionChatbot() {
                       <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
                         Premium Support
                       </p>
-                      <h2 className="mt-1 text-lg font-semibold text-white">{chatbotName}</h2>
-                      <p className="mt-1 text-sm text-slate-400">
+                      <h2 className="mt-1 text-base font-semibold text-white sm:text-lg">
+                        {chatbotName}
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-slate-400">
                         Clear guidance for services, quotes, and project inquiries.
                       </p>
                     </div>
@@ -320,13 +355,13 @@ export function ConstructionChatbot() {
                       className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-slate-300 transition hover:-translate-y-0.5 hover:border-white/20 hover:text-white"
                       aria-label="Close chatbot"
                     >
-                      ×
+                      x
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="max-h-[26rem] overflow-y-auto px-4 py-4">
+              <div className="max-h-[min(48vh,24rem)] overflow-y-auto px-3 py-4 sm:max-h-[26rem] sm:px-4">
                 <div className="space-y-3">
                   {messages.map((message) => (
                     <article
@@ -368,7 +403,7 @@ export function ConstructionChatbot() {
               </div>
 
               {showQuickReplies ? (
-                <div className="flex flex-wrap gap-2 border-t border-white/10 px-4 py-3">
+                <div className="flex flex-wrap gap-2 border-t border-white/10 px-3 py-3 sm:px-4">
                   {quickReplies.map((reply) => (
                     <button
                       key={reply}
@@ -383,7 +418,7 @@ export function ConstructionChatbot() {
               ) : null}
 
               <form
-                className="border-t border-white/10 bg-slate-950/80 px-4 py-4"
+                className="border-t border-white/10 bg-slate-950/80 px-3 py-4 sm:px-4"
                 onSubmit={(event) => {
                   event.preventDefault();
                   handleSend(inputValue);
@@ -423,15 +458,18 @@ export function ConstructionChatbot() {
 
         <div className="flex flex-col items-end gap-2">
           <AnimatePresence initial={false}>
-            {!isOpen ? (
+            {!isOpen && showFloatingDialogue ? (
               <motion.div
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.22 }}
-                className="mr-3 max-w-[15rem] rounded-[22px] rounded-br-md border border-white/10 bg-slate-950/95 px-4 py-3 text-sm leading-6 text-slate-100 shadow-[0_20px_50px_rgba(2,6,18,0.34)] backdrop-blur-xl"
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.08, y: 14 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.14, y: 10 }}
+                transition={{
+                  duration: prefersReducedMotion ? 0 : 0.56,
+                  ease: [0.42, 0, 0.58, 1]
+                }}
+                className="mr-2 max-w-[11.75rem] rounded-[22px] rounded-br-md border border-white/10 bg-slate-950/95 px-3 py-2.5 text-sm leading-6 text-slate-100 shadow-[0_20px_50px_rgba(2,6,18,0.34)] backdrop-blur-xl sm:mr-3 sm:max-w-[15rem] sm:px-4 sm:py-3"
               >
-                How can I help you today?
+                {floatingDialogues[floatingDialogueIndex]}
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -447,7 +485,7 @@ export function ConstructionChatbot() {
             aria-label={`Open ${chatbotName}`}
           >
             <span className="pointer-events-none absolute inset-x-6 bottom-2 h-6 rounded-full bg-slate-950/35 blur-xl transition duration-300 group-hover:opacity-90" />
-            <span className="relative h-[7.5rem] w-[6rem] overflow-visible">
+            <span className="relative h-[5.8rem] w-[4.8rem] overflow-visible sm:h-[7.5rem] sm:w-[6rem]">
               <Image
                 src="/assistant.png"
                 alt="Monricher Assistant"

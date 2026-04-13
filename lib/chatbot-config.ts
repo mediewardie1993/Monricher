@@ -20,7 +20,7 @@ export const greetingMessage =
   "Hi! Welcome to Monricher Construction. How can we help you today?";
 
 export const fallbackMessage =
-  "I’m sorry, I didn’t quite catch that. You can ask about our services, projects, timelines, service areas, or request a quote.";
+  "I'm sorry, I didn't quite catch that. You can ask about our services, projects, timelines, service areas, or request a quote.";
 
 export const quickReplies = [
   "Our Services",
@@ -47,7 +47,8 @@ export const leadSteps: Array<{
 }> = [
   {
     key: "projectType",
-    question: "What type of project do you have? (Example: residential, commercial, renovation, fit-out)"
+    question:
+      "What type of project do you have? (Example: residential, commercial, renovation, fit-out)"
   },
   {
     key: "location",
@@ -129,11 +130,18 @@ export const chatbotIntents: ChatIntent[] = [
     id: "quote",
     keywords: ["quote", "quotation", "estimate", "request a quote", "paquote", "inquire"],
     response:
-      "We’d be happy to help with that. To prepare a quote, please share your project type, location, and a short description of what you need."
+      "We'd be happy to help with that. To prepare a quote, please share your project type, location, and a short description of what you need."
   },
   {
     id: "location",
-    keywords: ["location", "service area", "where do you operate", "area", "nearby areas", "saan location"],
+    keywords: [
+      "location",
+      "service area",
+      "where do you operate",
+      "area",
+      "nearby areas",
+      "saan location"
+    ],
     response:
       "We primarily serve Metro Manila and nearby areas. You may still send your location and project details so we can confirm availability."
   },
@@ -159,7 +167,7 @@ export const chatbotIntents: ChatIntent[] = [
     id: "contact",
     keywords: ["contact", "phone", "email", "message", "how to contact", "reach you"],
     response:
-      "You can contact us through the Contact section of the website, or send your project details here and we’ll guide you to the next step."
+      "You can contact us through the Contact section of the website, or send your project details here and we'll guide you to the next step."
   },
   {
     id: "start_project",
@@ -173,6 +181,6 @@ export const chatbotIntents: ChatIntent[] = [
       "need renovation"
     ],
     response:
-      "Great — we can help you get started. Please tell us your project type, location, and what kind of work you need."
+      "Great - we can help you get started. Please tell us your project type, location, and what kind of work you need."
   }
 ];

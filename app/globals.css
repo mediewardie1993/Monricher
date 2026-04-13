@@ -4,13 +4,18 @@
 
 :root {
   color-scheme: dark;
+  --pointer-x: 50%;
+  --pointer-y: 18%;
 }
 
 body {
   background:
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(90, 150, 245, 0.14), transparent 18%),
     radial-gradient(circle at top left, rgba(114, 180, 255, 0.14), transparent 24%),
     radial-gradient(circle at top right, rgba(200, 169, 106, 0.12), transparent 18%),
     linear-gradient(180deg, #09111c 0%, #0a1320 100%);
+  overflow-x: hidden;
+  transition: background-position 0.18s ease-out;
 }
 
 @layer base {
@@ -28,11 +33,11 @@ body {
 
 @layer components {
   .container-shell {
-    @apply mx-auto w-[min(1180px,calc(100%-1.5rem))];
+    @apply mx-auto w-[min(1180px,calc(100%_-_1.5rem))];
   }
 
   .section-space {
-    @apply py-20 md:py-28;
+    @apply py-16 md:py-28;
   }
 
   .glass-panel {
@@ -49,16 +54,37 @@ body {
   }
 
   .button-primary {
-    @apply inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 py-3 font-extrabold text-slate-950 transition duration-300 hover:-translate-y-0.5 hover:shadow-glow;
+    @apply relative isolate inline-flex min-h-12 items-center justify-center overflow-hidden rounded-full border border-[#6eaaf7]/30 bg-[linear-gradient(135deg,#2d74d8_0%,#58a4ff_55%,#86c4ff_100%)] px-6 py-3 font-extrabold text-white transition duration-300;
+  }
+
+  .button-primary::before {
+    content: "";
+    @apply absolute inset-0 z-0 rounded-full bg-[linear-gradient(135deg,#c7772d_0%,#f0a85b_52%,#ffd4a6_100%)] opacity-0 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)];
+    transform: translateX(-108%);
+  }
+
+  .button-primary > span {
+    @apply relative z-10;
+  }
+
+  .button-primary:hover,
+  .button-primary:focus-visible {
+    @apply -translate-y-1 shadow-glow;
+  }
+
+  .button-primary:hover::before,
+  .button-primary:focus-visible::before {
+    @apply opacity-100;
+    transform: translateX(0);
   }
 
   .button-gold-sweep {
-    @apply relative inline-flex min-h-12 items-center justify-center overflow-hidden rounded-full border border-accent/40 bg-white/[0.03] px-6 py-3 font-bold text-white transition duration-300;
+    @apply relative isolate inline-flex min-h-12 items-center justify-center overflow-hidden rounded-full border border-accent/40 bg-white/[0.03] px-6 py-3 font-bold text-white transition duration-300;
   }
 
   .button-gold-sweep::before {
     content: "";
-    @apply absolute inset-0 rounded-full bg-[linear-gradient(135deg,#c7772d_0%,#f0a85b_54%,#ffd3a2_100%)] opacity-0 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)];
+    @apply absolute inset-0 z-0 rounded-full bg-[linear-gradient(135deg,#c7772d_0%,#f0a85b_54%,#ffd3a2_100%)] opacity-0 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)];
     transform: translateX(-108%);
   }
 
@@ -83,6 +109,36 @@ body {
   }
 
   .button-secondary {
-    @apply inline-flex min-h-12 items-center justify-center rounded-full border border-white/15 bg-white/[0.03] px-6 py-3 font-bold text-white transition duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-white/[0.08];
+    @apply relative isolate inline-flex min-h-12 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/[0.03] px-6 py-3 font-bold text-white transition duration-300;
+  }
+
+  .button-secondary::before {
+    content: "";
+    @apply absolute inset-0 z-0 rounded-full bg-[linear-gradient(135deg,#c7772d_0%,#f0a85b_54%,#ffd4a6_100%)] opacity-0 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)];
+    transform: translateX(108%);
+  }
+
+  .button-secondary > span {
+    @apply relative z-10;
+  }
+
+  .button-secondary:hover,
+  .button-secondary:focus-visible {
+    @apply -translate-y-1 border-accent/40 shadow-[0_18px_34px_rgba(7,19,35,0.22)];
+  }
+
+  .button-secondary:hover::before,
+  .button-secondary:focus-visible::before {
+    @apply opacity-100;
+    transform: translateX(0);
+  }
+
+  .button-secondary:hover > span,
+  .button-secondary:focus-visible > span {
+    @apply text-white;
+  }
+
+  .nav-chip {
+    @apply relative inline-flex items-center justify-center rounded-full px-3 py-2 text-[0.76rem] font-semibold tracking-[0.02em] text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:text-white;
   }
 }

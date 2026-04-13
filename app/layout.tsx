@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Plus_Jakarta_Sans } from "next/font/google";
+import { Manrope, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -7,9 +7,11 @@ const manrope = Manrope({
   variable: "--font-body"
 });
 
-const jakarta = Plus_Jakarta_Sans({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-display"
+  variable: "--font-display",
+  weight: ["500", "600", "700", "800"],
+  style: ["normal", "italic"]
 });
 
 export const metadata: Metadata = {
@@ -26,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${manrope.variable} ${jakarta.variable} bg-background font-sans text-text antialiased`}
+        className={`${manrope.variable} ${playfair.variable} bg-background font-sans text-text antialiased`}
       >
         {children}
       </body>

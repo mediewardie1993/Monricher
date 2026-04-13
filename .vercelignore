@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.vercel
+*.rar
+*.zip
+*.7z
+*.mkv
+_video_frames
