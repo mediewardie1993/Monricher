@@ -3,7 +3,9 @@ import { PageShell } from "@/components/page-shell";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { SkipToRail } from "@/components/skip-to-rail";
+import { TiltCard } from "@/components/tilt-card";
 import { serviceItems } from "@/lib/site-data";
+import { withBasePath } from "@/lib/base-path";
 
 export default function ServicesPage() {
   return (
@@ -21,8 +23,8 @@ export default function ServicesPage() {
         <div className="container-shell">
           <SectionHeading
             kicker="Services"
-            title="Dedicated service options for residential, commercial, and fit-out projects."
-            text="Each service line is designed to stay clear for clients while delivering premium results."
+            title="High quality design and construction, for all industries."
+            text="From consultation and design through demolition, electrical, mechanical, and plumbing works — handled by our own certified team."
           />
         </div>
       </section>
@@ -32,13 +34,21 @@ export default function ServicesPage() {
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {serviceItems.map((item, index) => (
               <Reveal key={item.title} delay={index * 0.06}>
-                <article className="glass-panel h-full rounded-[28px] p-6">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
-                    {`0${index + 1}`}
-                  </span>
-                  <h3 className="mt-4 text-2xl font-bold leading-tight text-white">{item.title}</h3>
-                  <p className="mt-4 text-base leading-7 text-muted">{item.text}</p>
-                </article>
+                <TiltCard className="glass-panel h-full overflow-hidden rounded-[28px]">
+                  <div
+                    className="photo-grade h-40 bg-cover bg-center"
+                    style={{ backgroundImage: `url('${item.image}')` }}
+                    role="img"
+                    aria-label={item.title}
+                  />
+                  <div className="p-6">
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
+                      {`0${index + 1}`}
+                    </span>
+                    <h3 className="mt-4 text-2xl font-bold leading-tight text-white">{item.title}</h3>
+                    <p className="mt-4 text-base leading-7 text-muted">{item.text}</p>
+                  </div>
+                </TiltCard>
               </Reveal>
             ))}
           </div>
@@ -46,7 +56,7 @@ export default function ServicesPage() {
       </section>
 
       <LagImageWindow
-        image="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80"
+        image="/photos/medical-city-counter.jpg"
         kicker="Execution"
         title="Every service is delivered with structure, visibility, and professional pace."
       />
@@ -65,9 +75,9 @@ export default function ServicesPage() {
               "Final quality review and turnover"
             ].map((item, index) => (
               <Reveal key={item} delay={index * 0.05}>
-                <article className="glass-panel rounded-[22px] p-6">
+                <TiltCard className="glass-panel rounded-[22px] p-6">
                   <p className="text-lg font-semibold text-white">{item}</p>
-                </article>
+                </TiltCard>
               </Reveal>
             ))}
           </div>
@@ -83,7 +93,7 @@ export default function ServicesPage() {
               Share your project details and we will guide you to the best service package.
             </p>
             <div className="mt-8 flex justify-center">
-              <a href="/contact" className="button-primary w-full sm:w-auto">
+              <a href={withBasePath("/contact")} className="button-primary w-full sm:w-auto">
                 <span>Get a Free Quote</span>
               </a>
             </div>

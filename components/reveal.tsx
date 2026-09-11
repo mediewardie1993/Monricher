@@ -32,15 +32,19 @@ export function Reveal({ children, className, delay = 0 }: RevealProps) {
 
   const hiddenState = {
     opacity: 0,
-    y: scrollDirection === "down" ? 24 : -24
+    y: scrollDirection === "down" ? 24 : -24,
+    rotateX: scrollDirection === "down" ? 8 : -8
   };
 
   return (
     <motion.div
       ref={containerRef}
       className={className}
+      style={prefersReducedMotion ? undefined : { transformPerspective: 1200 }}
       initial={prefersReducedMotion ? false : hiddenState}
-      animate={prefersReducedMotion ? { opacity: 1 } : isInView ? { opacity: 1, y: 0 } : hiddenState}
+      animate={
+        prefersReducedMotion ? { opacity: 1 } : isInView ? { opacity: 1, y: 0, rotateX: 0 } : hiddenState
+      }
       transition={{
         duration: 0.82,
         ease: [0.22, 1, 0.36, 1],

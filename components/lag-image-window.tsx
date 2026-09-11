@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { withBasePath } from "@/lib/base-path";
 
 type LagImageWindowProps = {
   image: string;
@@ -35,10 +36,18 @@ export function LagImageWindow({
 
   return (
     <section ref={sectionRef} className={`relative overflow-hidden py-16 md:py-24 ${className}`}>
-      <motion.div style={{ y: imageY }} className="absolute -inset-y-12 inset-x-0" aria-hidden="true">
+      <motion.div
+        style={{ y: imageY }}
+        className="absolute -inset-y-12 inset-x-0 overflow-hidden"
+        initial={{ scale: 1.05 }}
+        whileInView={{ scale: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+        aria-hidden="true"
+      >
         <div
-          className="absolute inset-0 scale-[1.18] bg-cover bg-center"
-          style={{ backgroundImage: `url('${image}')` }}
+          className="photo-grade ken-burns absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url('${withBasePath(image)}')` }}
         />
       </motion.div>
       <div

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope, Playfair_Display } from "next/font/google";
+import { CinematicOverlay } from "@/components/cinematic-overlay";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${manrope.variable} ${playfair.variable} bg-background font-sans text-text antialiased`}
       >
         {children}
+        <CinematicOverlay />
       </body>
     </html>
   );

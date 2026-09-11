@@ -2,6 +2,8 @@ import { PageShell } from "@/components/page-shell";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { SkipToRail } from "@/components/skip-to-rail";
+import { TiltCard } from "@/components/tilt-card";
+import { companyInfo } from "@/lib/site-data";
 
 export default function ContactPage() {
   return (
@@ -63,17 +65,23 @@ export default function ContactPage() {
                   />
                 </label>
                 <label className="grid gap-2 text-sm font-bold text-slate-100">
-                  Project Type
+                  Service
                   <select className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-base text-white outline-none transition focus:border-accent/50 focus:ring-4 focus:ring-accent/10">
-                    <option className="bg-panel">Select project type</option>
-                    <option className="bg-panel">Residential Construction</option>
-                    <option className="bg-panel">Commercial Construction</option>
-                    <option className="bg-panel">Renovation & Remodeling</option>
-                    <option className="bg-panel">Design & Build</option>
-                    <option className="bg-panel">Fit-Out Services</option>
+                    <option className="bg-panel">Select a service</option>
+                    <option className="bg-panel">Consultation</option>
+                    <option className="bg-panel">Design</option>
+                    <option className="bg-panel">General Construction Services</option>
                   </select>
                 </label>
               </div>
+              <label className="grid gap-2 text-sm font-bold text-slate-100">
+                Company Name <span className="font-normal text-muted">(optional)</span>
+                <input
+                  type="text"
+                  placeholder="Your company name"
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-base text-white outline-none transition focus:border-accent/50 focus:ring-4 focus:ring-accent/10"
+                />
+              </label>
               <label className="grid gap-2 text-sm font-bold text-slate-100">
                 Message
                 <textarea
@@ -83,7 +91,7 @@ export default function ContactPage() {
                 />
               </label>
               <button type="submit" className="button-primary w-full sm:w-auto">
-                <span>Request Consultation</span>
+                <span>Build With Us</span>
               </button>
             </form>
           </Reveal>
@@ -94,16 +102,16 @@ export default function ContactPage() {
         <div className="container-shell">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {[
-              ["Phone", "+639-xxxxxxxxxx"],
-              ["Email", "info@MRconstruction.com"],
-              ["Office", "Caloocan City, Metro Manila"],
-              ["Hours", "Mon - Sat | 8:00 AM - 6:00 PM"]
+              ["Mobile Number", companyInfo.phone],
+              ["Email Address", companyInfo.email],
+              ["Physical Address", companyInfo.address],
+              ["Facebook Page", companyInfo.facebook]
             ].map(([label, value], index) => (
               <Reveal key={label} delay={index * 0.05}>
-                <article className="glass-panel rounded-[22px] p-6">
+                <TiltCard className="glass-panel rounded-[22px] p-6">
                   <p className="section-kicker">{label}</p>
                   <p className="mt-3 text-lg font-semibold text-white">{value}</p>
-                </article>
+                </TiltCard>
               </Reveal>
             ))}
           </div>

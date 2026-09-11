@@ -143,7 +143,7 @@ export const chatbotIntents: ChatIntent[] = [
       "saan location"
     ],
     response:
-      "We primarily serve Metro Manila and nearby areas. You may still send your location and project details so we can confirm availability."
+      "We're based in Sta. Maria, Bulacan and serve Metro Manila and nearby areas. You may still send your location and project details so we can confirm availability."
   },
   {
     id: "timeline",

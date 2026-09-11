@@ -1,117 +1,109 @@
-export const navItems = [
+import { withBasePath } from "@/lib/base-path";
+
+const rawNavItems = [
   { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
   { label: "Projects", href: "/projects" },
   { label: "Services", href: "/services" },
-  { label: "Team", href: "/team" },
   { label: "Contact", href: "/contact" }
 ];
 
-export const serviceItems = [
+export const navItems = rawNavItems.map((item) => ({ ...item, href: withBasePath(item.href) }));
+
+const rawServiceItems = [
   {
-    title: "Residential Construction",
-    text: "Thoughtfully built homes that balance lasting quality, modern detailing, and everyday comfort."
+    title: "Consultation",
+    text: "Our team of experienced professionals and certified experts ensures a seamless project conceptualization and planning process, delivering a foundation that aligns with your design vision and objectives.",
+    image: "/photos/consultation.jpg"
   },
   {
-    title: "Commercial Construction",
-    text: "Reliable commercial environments designed for business performance, client confidence, and long-term value."
+    title: "Architectural Design",
+    text: "Our team of skilled professionals delivers architectural designs that blend innovation with functionality.",
+    image: "/photos/design.jpg"
   },
   {
-    title: "Renovation & Remodeling",
-    text: "Careful upgrades that improve existing spaces without making the process difficult to understand."
+    title: "Electrical Design",
+    text: "Our team of skilled professionals provides electrical designs that prioritize efficiency and reliability.",
+    image: "/photos/electrical-design.jpg"
   },
   {
-    title: "Design & Build",
-    text: "A single coordinated team managing design intent, planning, and construction delivery."
+    title: "Demolition Works",
+    text: "Starting anew? Let us set a new ground for a better purpose.",
+    image: "/photos/demolition-works.png"
   },
   {
-    title: "Fit-Out Services",
-    text: "Refined interior finishing for offices, retail spaces, hospitality settings, and premium commercial use."
+    title: "Cabinet Works",
+    text: "Have your cabinetry offer the utmost convenience. We craft customized cabinets that fit your lifestyle perfectly.",
+    image: "/photos/cabinet-works.jpg"
+  },
+  {
+    title: "Painting Works",
+    text: "We have skilled painters that can actualize any finish or design you want in the highest quality.",
+    image: "/photos/painting-works.png"
+  },
+  {
+    title: "Fire Protection",
+    text: "Have your spaces safe from potential fire. We install sprinklers, fire detection and alarm systems, and fire hose cabinets.",
+    image: "/photos/fire-protection.jpg"
+  },
+  {
+    title: "Electrical and Electronics Installation",
+    text: "Installation of lighting fixtures, power outlets, switches, panel boards, CCTV, and other electrical works — our team ensures a safe and efficient electrical system in your spaces.",
+    image: "/photos/electrical-works.png"
+  },
+  {
+    title: "Mechanical Works and Aircon Installation",
+    text: "We offer installation of aircon units, exhaust fans, ducting, and other mechanical works.",
+    image: "/photos/aircon-installation.png"
+  },
+  {
+    title: "Plumbing Installation",
+    text: "Installation of plumbing fixtures, waterlines, sanitary lines, water tanks, water meters, and other plumbing works.",
+    image: "/photos/plumbing-works.png"
   }
 ];
 
+export const serviceItems = rawServiceItems.map((item) => ({ ...item, image: withBasePath(item.image) }));
+
+// Grounded in Monricher's real Mission Statement.
 export const reasons = [
-  "Transparent project communication",
-  "Skilled and dependable workforce",
-  "Strong finishing standards",
-  "On-time delivery mindset",
-  "Quality material selection",
-  "Professional client experience"
+  "Honesty and integrity in every client relationship",
+  "Consistent, quality-driven workmanship on every project",
+  "Client relationships built for the long term",
+  "Motivated, flexible, and focused project teams",
+  "Open leadership with owners, architects, and engineers alike",
+  "Cost-effective projects delivered on schedule"
 ];
 
-export const testimonials = [
+// Monricher's actual completed work — Metro Manila & Bulacan, Philippines.
+const rawFeaturedProjects = [
   {
-    quote:
-      "Monricher made the entire process feel organized and trustworthy. The final finish looked premium without the experience becoming stressful.",
-    name: "Amaka E.",
-    location: "Lagos"
+    title: "The Medical City Clinics",
+    subtitle: "Medical Clinics • TriNoma, SM & Robinsons Malls",
+    image: "/photos/medical-city-reception.jpg"
   },
   {
-    quote:
-      "Their team combined modern design sensibility with the practical discipline we needed for a commercial project. Communication stayed clear throughout.",
-    name: "David O.",
-    location: "Abuja"
+    title: "Ricardo L. Laxamana Hospital",
+    subtitle: "Hospital Construction • Bulacan",
+    image: "/photos/rll-hospital-1.jpg"
   },
   {
-    quote:
-      "What impressed us most was their professionalism. Every stage felt well managed, and the result was something we were proud to show clients.",
-    name: "Grace A.",
-    location: "Port Harcourt"
+    title: "Moldex Residences",
+    subtitle: "Residential Development • Jasmine, Ivanah & Blanche Models",
+    image: "/photos/moldex-jasmine.png"
   }
 ];
 
-export const featuredProjects = [
-  {
-    title: "Horizon Residence",
-    subtitle: "Residential Build • Lagos",
-    image:
-      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Axis Business Lounge",
-    subtitle: "Commercial Fit-Out • Abuja",
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Harbor View Upgrade",
-    subtitle: "Renovation • Port Harcourt",
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Oakline Villa",
-    subtitle: "Luxury Upgrade • Ikoyi",
-    image:
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Summit Executive Suites",
-    subtitle: "Corporate Interior • Lekki",
-    image:
-      "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Atlas Reception Hall",
-    subtitle: "Hospitality Fit-Out • Benin City",
-    image:
-      "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Westpoint Corner",
-    subtitle: "Mixed-Use Build • Victoria Island",
-    image:
-      "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Crestline Pavilion",
-    subtitle: "Design & Build • Asaba",
-    image:
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Northgate Trade Hub",
-    subtitle: "Commercial Build • Enugu",
-    image:
-      "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80"
-  }
-];
+export const featuredProjects = rawFeaturedProjects.map((project) => ({
+  ...project,
+  image: withBasePath(project.image)
+}));
+
+export const companyInfo = {
+  legalName: "Monricher Construction and Development Corp",
+  address: "San Jose, Patag, Sta. Maria, Bulacan",
+  phone: "0917-822-7367",
+  email: "monricher317@gmail.com",
+  facebook: "facebook.com/MonricherCDC",
+  facebookUrl: "https://facebook.com/MonricherCDC"
+};

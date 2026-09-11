@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { navItems } from "@/lib/site-data";
+import { SiteLogo } from "@/components/site-logo";
+import { withBasePath } from "@/lib/base-path";
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -32,7 +34,7 @@ export function SiteHeader() {
       </div>
       <div className="container-shell relative">
         <div className="flex items-center justify-between gap-4 py-3 md:py-4">
-          <div className="h-10 w-20 shrink-0 sm:w-28" aria-hidden="true" />
+          <SiteLogo />
 
           <nav className="hidden items-center gap-6 xl:flex">
             {navItems.map((item, index) => (
@@ -54,7 +56,7 @@ export function SiteHeader() {
               </a>
             ))}
             <a
-              href="/projects"
+              href={withBasePath("/projects")}
               className="button-secondary min-h-10 px-4 py-2 text-[0.76rem]"
               onMouseEnter={() => setGlowOffset(-1780)}
               onFocus={() => setGlowOffset(-1780)}
@@ -63,7 +65,7 @@ export function SiteHeader() {
               <span>View Projects</span>
             </a>
             <a
-              href="/contact"
+              href={withBasePath("/contact")}
               className="button-primary min-h-10 px-4 py-2 text-[0.76rem]"
               onMouseEnter={() => setGlowOffset(-1610)}
               onFocus={() => setGlowOffset(-1610)}
@@ -110,14 +112,14 @@ export function SiteHeader() {
                 </a>
               ))}
               <a
-                href="/projects"
+                href={withBasePath("/projects")}
                 onClick={() => setOpen(false)}
                 className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3.5 text-base font-semibold text-slate-100"
               >
                 View Projects
               </a>
               <a
-                href="/contact"
+                href={withBasePath("/contact")}
                 onClick={() => setOpen(false)}
                 className="button-primary w-full"
               >

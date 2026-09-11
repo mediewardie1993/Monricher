@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Static export needs its own config: middleware (proxy.ts) isn't
+      # supported under `output: "export"`, and GitHub Pages project sites
+      # serve from /<repo-name>/, not the domain root, so assets need that
+      # base path baked in. Swapped in only for this CI build — the repo's
+      # committed next.config.mjs / proxy.ts stay untouched for local dev.
+      - name: Configure for static export
+        run: |
+          mv proxy.ts proxy.ts.disabled-for-export
+          cat > next.config.mjs <<'EOF'
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            output: "export",
+            trailingSlash: true,
+            basePath: "/Monricher",
+            assetPrefix: "/Monricher/",
+            images: { unoptimized: true }
+          };
+          export default nextConfig;
+          EOF
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /Monricher
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

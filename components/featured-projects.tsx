@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "fr
 import { useRef, useState } from "react";
 import { Reveal } from "@/components/reveal";
 import { featuredProjects } from "@/lib/site-data";
+import { withBasePath } from "@/lib/base-path";
 
 type VerticalProjectCardProps = {
   title: string;
@@ -60,7 +61,7 @@ function VerticalProjectCard({
 
   return (
     <motion.a
-      href="/projects#projects-all"
+      href={withBasePath("/projects#projects-all")}
       onMouseEnter={() => setActiveIndex(index)}
       onFocus={() => setActiveIndex(index)}
       onClick={() => setActiveIndex(index)}
@@ -77,7 +78,7 @@ function VerticalProjectCard({
         aria-hidden="true"
       >
         <div
-          className="h-full w-[220%] bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.03]"
+          className="photo-grade h-full w-[220%] bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.03]"
           style={{ backgroundImage: `url('${image}')` }}
         />
       </motion.div>
@@ -124,7 +125,7 @@ function MobileProjectCard({
       style={prefersReducedMotion ? undefined : { y: mobileY }}
       className="relative overflow-hidden rounded-[24px] border border-white/10 bg-panel shadow-soft"
     >
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
+      <div className="photo-grade absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${image}')` }} />
       <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,10,18,0.2)] via-[rgba(5,10,18,0.42)] to-[rgba(5,10,18,0.9)]" />
       <div className="relative min-h-[22rem]" />
       <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-5">

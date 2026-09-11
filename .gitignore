@@ -11,3 +11,4 @@ Thumbs.db
 *.7z
 *.mkv
 _video_frames/
+tsconfig.tsbuildinfo

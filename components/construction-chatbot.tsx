@@ -14,6 +14,7 @@ import {
   quickReplies,
   type LeadData
 } from "@/lib/chatbot-config";
+import { withBasePath } from "@/lib/base-path";
 
 type Message = {
   id: string;
@@ -321,7 +322,7 @@ export function ConstructionChatbot() {
                   <div className="flex items-start gap-3">
                     <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] sm:h-14 sm:w-14">
                       <Image
-                        src="/assistant.png"
+                        src={withBasePath("/assistant.png")}
                         alt="Monricher Assistant"
                         fill
                         sizes="56px"
@@ -487,7 +488,7 @@ export function ConstructionChatbot() {
             <span className="pointer-events-none absolute inset-x-6 bottom-2 h-6 rounded-full bg-slate-950/35 blur-xl transition duration-300 group-hover:opacity-90" />
             <span className="relative h-[5.8rem] w-[4.8rem] overflow-visible sm:h-[7.5rem] sm:w-[6rem]">
               <Image
-                src="/assistant.png"
+                src={withBasePath("/assistant.png")}
                 alt="Monricher Assistant"
                 fill
                 sizes="96px"
