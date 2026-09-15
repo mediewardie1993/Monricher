@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { SkipToRail } from "@/components/skip-to-rail";
 import { TiltCard } from "@/components/tilt-card";
 import { companyInfo } from "@/lib/site-data";
+import { withBasePath } from "@/lib/base-path";
 
 export default function ContactPage() {
   return (
@@ -90,6 +91,14 @@ export default function ContactPage() {
                   className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-base text-white outline-none transition focus:border-accent/50 focus:ring-4 focus:ring-accent/10"
                 />
               </label>
+              <p className="text-xs leading-6 text-muted">
+                By submitting this form, you agree to let us use the details you've shared to respond to your
+                inquiry, in line with our{" "}
+                <a href={withBasePath("/privacy")} className="underline decoration-white/30 underline-offset-4 hover:text-white">
+                  Privacy Policy
+                </a>
+                .
+              </p>
               <button type="submit" className="button-primary w-full sm:w-auto">
                 <span>Build With Us</span>
               </button>

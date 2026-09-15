@@ -30,6 +30,9 @@ export function SiteFooter() {
               A 100% Filipino capitalized corporation delivering construction, design, and
               development services with honesty and integrity.
             </p>
+            <a href={withBasePath("/privacy")} className="inline-block text-sm text-muted underline decoration-white/20 underline-offset-4 transition hover:text-white hover:decoration-white/50">
+              Privacy Policy
+            </a>
           </div>
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-200">Quick Links</h3>

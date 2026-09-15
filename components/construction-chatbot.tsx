@@ -450,7 +450,12 @@ export function ConstructionChatbot() {
                   </button>
                 </div>
                 <p id="monricher-chat-disclaimer" className="mt-3 text-xs leading-6 text-slate-500">
-                  Responses are for general guidance. Final recommendations depend on project assessment.
+                  Responses are for general guidance. Final recommendations depend on project assessment. Details
+                  you share here are used only to follow up on your inquiry — see our{" "}
+                  <a href={withBasePath("/privacy")} className="underline decoration-white/20 underline-offset-4 hover:text-white">
+                    Privacy Policy
+                  </a>
+                  .
                 </p>
               </form>
             </motion.section>
