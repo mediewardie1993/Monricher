@@ -322,7 +322,7 @@ export function ConstructionChatbot() {
                   <div className="flex items-start gap-3">
                     <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] sm:h-14 sm:w-14">
                       <Image
-                        src={withBasePath("/assistant.png")}
+                        src={withBasePath("/logo-icon.png")}
                         alt="Monricher Assistant"
                         fill
                         sizes="56px"
@@ -490,14 +490,14 @@ export function ConstructionChatbot() {
             aria-controls="monricher-chat-panel"
             aria-label={`Open ${chatbotName}`}
           >
-            <span className="pointer-events-none absolute inset-x-6 bottom-2 h-6 rounded-full bg-slate-950/35 blur-xl transition duration-300 group-hover:opacity-90" />
-            <span className="relative h-[5.8rem] w-[4.8rem] overflow-visible sm:h-[7.5rem] sm:w-[6rem]">
+            <span className="pointer-events-none absolute inset-x-3 bottom-1 h-5 rounded-full bg-slate-950/35 blur-xl transition duration-300 group-hover:opacity-90" />
+            <span className="relative flex h-16 w-16 items-center justify-center overflow-visible rounded-full bg-white shadow-[0_18px_36px_rgba(2,6,18,0.4)] transition duration-300 group-hover:scale-105 sm:h-20 sm:w-20">
               <Image
-                src={withBasePath("/assistant.png")}
+                src={withBasePath("/logo-icon.png")}
                 alt="Monricher Assistant"
                 fill
-                sizes="96px"
-                className="object-contain drop-shadow-[0_20px_24px_rgba(2,6,18,0.42)]"
+                sizes="80px"
+                className="object-contain p-2.5"
               />
             </span>
           </motion.button>
