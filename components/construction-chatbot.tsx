@@ -15,6 +15,8 @@ import {
   type LeadData
 } from "@/lib/chatbot-config";
 import { withBasePath } from "@/lib/base-path";
+import { sendInquiry } from "@/lib/inquiry";
+import { companyInfo } from "@/lib/site-data";
 
 type Message = {
   id: string;
@@ -210,9 +212,24 @@ export function ConstructionChatbot() {
     queueAssistantReply(leadSteps[0].question);
   };
 
-  const completeLeadCapture = (nextLeadData: LeadData) => {
+  const completeLeadCapture = async (nextLeadData: LeadData) => {
+    setActiveLeadStep(null);
+    setIsTyping(true);
+
+    const sent = await sendInquiry(`New chatbot inquiry from ${chatbotName}`, {
+      project_type: nextLeadData.projectType,
+      location: nextLeadData.location,
+      scope: nextLeadData.scope,
+      budget: nextLeadData.budget,
+      timeline: nextLeadData.timeline,
+      name: nextLeadData.name,
+      contact: nextLeadData.contact
+    });
+
     const summary = [
-      "Thank you. Here is a summary of your inquiry:",
+      sent
+        ? "Thank you. Here is a summary of your inquiry — it's been sent to our team:"
+        : "Here is a summary of your inquiry. We couldn't send it automatically, so please also reach us directly using the details below:",
       `Project type: ${nextLeadData.projectType}`,
       `Location: ${nextLeadData.location}`,
       `Scope of work: ${nextLeadData.scope}`,
@@ -221,14 +238,12 @@ export function ConstructionChatbot() {
       `Name: ${nextLeadData.name}`,
       `Contact info: ${nextLeadData.contact}`,
       "",
-      "Our team can review this information and get back to you with the next steps.",
+      sent
+        ? "Our team can review this information and get back to you with the next steps."
+        : `Phone: ${companyInfo.phone} | Email: ${companyInfo.email}`,
       "Responses are for general guidance. Final recommendations depend on project assessment."
     ].join("\n");
 
-    // Future backend or email API integration can be connected here.
-    console.log("Monricher lead inquiry", nextLeadData);
-
-    setActiveLeadStep(null);
     queueAssistantReply(summary);
   };
 

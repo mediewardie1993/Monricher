@@ -12,3 +12,6 @@ Thumbs.db
 *.mkv
 _video_frames/
 tsconfig.tsbuildinfo
+
+# Local MCP server config — holds live API tokens, never commit
+.mcp.json
