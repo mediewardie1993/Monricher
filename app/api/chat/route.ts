@@ -10,7 +10,7 @@ import { companyInfo, reasons, serviceItems } from "@/lib/site-data";
 export const runtime = "edge";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-20b";
 
 const systemPrompt = `You are the Monricher Assistant, the virtual assistant for Monricher Construction and Development Corp, a construction company based at ${companyInfo.address}, Philippines.
 
