@@ -480,6 +480,12 @@ export function ConstructionChatbot() {
                     rows={1}
                     value={inputValue}
                     onChange={(event) => setInputValue(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        handleSend(inputValue);
+                      }
+                    }}
                     placeholder={
                       activeLeadStep !== null
                         ? "Type your answer here"
