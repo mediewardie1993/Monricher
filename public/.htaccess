@@ -1,0 +1,13 @@
+# Mirrors the security headers set in next.config.mjs for the Vercel
+# deployment — this is the Apache/LiteSpeed equivalent for static hosting
+# (Hostinger) where Next.js itself never runs.
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# Static export routes (e.g. /about/) resolve to /about/index.html on disk.
+# Without this, Apache 404s on the clean URLs the site actually links to.
+DirectoryIndex index.html
