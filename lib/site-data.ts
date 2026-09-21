@@ -75,26 +75,22 @@ export const reasons = [
   "Cost-effective projects delivered on schedule"
 ];
 
-// Monricher's actual completed work — Metro Manila & Bulacan, Philippines.
-const rawFeaturedProjects = [
-  {
-    title: "The Medical City Clinics",
-    subtitle: "Medical Clinics • TriNoma, SM & Robinsons Malls",
-    image: "/photos/medical-city-reception.jpg"
-  },
+// Additional completed work shown lower on the Projects page, below the
+// featured Medical City branches.
+const rawAdditionalProjects = [
   {
     title: "Ricardo L. Laxamana Hospital",
-    subtitle: "Hospital Construction • Bulacan",
+    detail: "A full hospital construction project in Bulacan, from structural works through interior fit-out.",
     image: "/photos/rll-hospital-1.jpg"
   },
   {
     title: "Moldex Residences",
-    subtitle: "Residential Development • Jasmine, Ivanah & Blanche Models",
+    detail: "Residential builds across the Jasmine, Ivanah, and Blanche house models.",
     image: "/photos/moldex-jasmine.png"
   }
 ];
 
-export const featuredProjects = rawFeaturedProjects.map((project) => ({
+export const additionalProjects = rawAdditionalProjects.map((project) => ({
   ...project,
   image: withBasePath(project.image)
 }));
@@ -107,3 +103,93 @@ export const companyInfo = {
   facebook: "facebook.com/MonricherCDC",
   facebookUrl: "https://facebook.com/MonricherCDC"
 };
+
+export type ProjectGalleryEntry = {
+  title: string;
+  location: string;
+  cover: string;
+  images: string[];
+};
+
+export type ProjectGalleryGroup = {
+  category: string;
+  projects: ProjectGalleryEntry[];
+};
+
+const rawProjectGalleries: ProjectGalleryGroup[] = [
+  {
+    category: "The Medical City Clinics",
+    projects: [
+      {
+        title: "Robinsons Antipolo",
+        location: "Antipolo City",
+        cover: "/photos/tmcc-antipolo-1.png",
+        images: [1, 2, 3, 4, 5, 6, 7].map((n) => `/photos/tmcc-antipolo-${n}.png`)
+      },
+      {
+        title: "Robinsons Cainta",
+        location: "Cainta, Rizal",
+        cover: "/photos/tmcc-cainta-1.png",
+        images: [1, 2, 3, 4].map((n) => `/photos/tmcc-cainta-${n}.png`)
+      },
+      {
+        title: "SM City Cauayan",
+        location: "Cauayan, Isabela",
+        cover: "/photos/tmcc-cauayan-1.png",
+        images: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `/photos/tmcc-cauayan-${n}.png`)
+      },
+      {
+        title: "TriNoma",
+        location: "Quezon City",
+        cover: "/photos/tmcc-trinoma-1.png",
+        images: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `/photos/tmcc-trinoma-${n}.png`)
+      }
+    ]
+  },
+  {
+    category: "Residences",
+    projects: [
+      {
+        title: "Bliss Tagaytay",
+        location: "Tagaytay City",
+        cover: "/photos/bliss-tagaytay-front.png",
+        images: [
+          "front.png",
+          "front-2.png",
+          "balcony.png",
+          "court.png",
+          "pool.jpg",
+          "rooftop.png",
+          "kitchen.png",
+          "bedroom-2.png",
+          "bedroom-4.png",
+          "bedroom-4-2.png",
+          "mezzanine.png",
+          "toilet-bath.png"
+        ].map((file) => `/photos/bliss-tagaytay-${file}`)
+      }
+    ]
+  }
+];
+
+export const projectGalleries: ProjectGalleryGroup[] = rawProjectGalleries.map((group) => ({
+  ...group,
+  projects: group.projects.map((project) => ({
+    ...project,
+    cover: withBasePath(project.cover),
+    images: project.images.map((image) => withBasePath(image))
+  }))
+}));
+
+// Featured on the homepage / projects hero carousel — the real Medical City
+// branch photos, front and center.
+const medicalCityBranches = rawProjectGalleries.find(
+  (group) => group.category === "The Medical City Clinics"
+)?.projects ?? [];
+
+export const featuredProjects = medicalCityBranches.map((project) => ({
+  title: `TMCC ${project.title}`,
+  subtitle: `The Medical City Clinics • ${project.location}`,
+  image: withBasePath(project.cover),
+  images: project.images.map((image) => withBasePath(image))
+}));

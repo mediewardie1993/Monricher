@@ -202,10 +202,6 @@ export function ConstructionChatbot() {
     }, delay);
   };
 
-  const appendUserMessage = (content: string) => {
-    setMessages((current) => [...current, createMessage("user", content)]);
-  };
-
   const beginLeadCapture = () => {
     setActiveLeadStep(0);
     setLeadData(defaultLeadData);
@@ -268,7 +264,36 @@ export function ConstructionChatbot() {
     completeLeadCapture(nextLeadData);
   };
 
-  const handleFaqFlow = (value: string) => {
+  const showCtaIfDue = (nextFaqCount: number) => {
+    if (nextFaqCount < 3) return;
+    setMessages((current) => {
+      const alreadyShown = current.some((message) => message.content === CTA_MESSAGE);
+      return alreadyShown ? current : [...current, createMessage("assistant", CTA_MESSAGE)];
+    });
+  };
+
+  const askAi = async (conversation: Message[]): Promise<string | null> => {
+    try {
+      const response = await fetch(withBasePath("/api/chat"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: conversation
+            .slice(-10)
+            .map((message) => ({ role: message.role, content: message.content }))
+        })
+      });
+
+      if (!response.ok) return null;
+
+      const data = (await response.json()) as { reply?: string };
+      return data.reply?.trim() || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleFaqFlow = async (value: string, conversation: Message[]) => {
     const intent = findIntent(value);
     const nextFaqCount = faqCount + 1;
     setFaqCount(nextFaqCount);
@@ -279,21 +304,27 @@ export function ConstructionChatbot() {
       return;
     }
 
-    queueAssistantReply(intent?.response ?? fallbackMessage, () => {
-      if (nextFaqCount >= 3) {
-        setMessages((current) => {
-          const alreadyShown = current.some((message) => message.content === CTA_MESSAGE);
-          return alreadyShown ? current : [...current, createMessage("assistant", CTA_MESSAGE)];
-        });
-      }
-    });
+    setIsTyping(true);
+    const aiReply = await askAi(conversation);
+
+    if (typingTimerRef.current) {
+      window.clearTimeout(typingTimerRef.current);
+    }
+    setIsTyping(false);
+    setMessages((current) => [
+      ...current,
+      createMessage("assistant", aiReply ?? intent?.response ?? fallbackMessage)
+    ]);
+    showCtaIfDue(nextFaqCount);
   };
 
   const handleSend = (value: string) => {
     const trimmedValue = value.trim();
     if (!trimmedValue) return;
 
-    appendUserMessage(trimmedValue);
+    const userMessage = createMessage("user", trimmedValue);
+    const conversation = [...messages, userMessage];
+    setMessages(conversation);
     setInputValue("");
 
     if (activeLeadStep !== null) {
@@ -301,7 +332,7 @@ export function ConstructionChatbot() {
       return;
     }
 
-    handleFaqFlow(trimmedValue);
+    void handleFaqFlow(trimmedValue, conversation);
   };
 
   const clearChat = () => {

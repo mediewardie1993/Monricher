@@ -1,26 +1,13 @@
 import { FeaturedProjects } from "@/components/featured-projects";
 import { LagImageWindow } from "@/components/lag-image-window";
 import { PageShell } from "@/components/page-shell";
+import { ProjectGalleryCard } from "@/components/project-gallery-card";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { SkipToRail } from "@/components/skip-to-rail";
 import { TiltCard } from "@/components/tilt-card";
 import { withBasePath } from "@/lib/base-path";
-
-const projectDetails = [
-  {
-    title: "The Medical City Clinics",
-    detail: "Built across TriNoma, SM City Sta. Rosa, Robinsons Antipolo, SM City Olongapo, SM City Roxas, SM Grand Central, and SM City Cauayan."
-  },
-  {
-    title: "Ricardo L. Laxamana Hospital",
-    detail: "A full hospital construction project in Bulacan, from structural works through interior fit-out."
-  },
-  {
-    title: "Moldex Residences",
-    detail: "Residential builds across the Jasmine, Ivanah, and Blanche house models."
-  }
-];
+import { additionalProjects, projectGalleries } from "@/lib/site-data";
 
 export default function ProjectsPage() {
   return (
@@ -60,16 +47,46 @@ export default function ProjectsPage() {
           <SectionHeading
             kicker="Where We've Built"
             title="A closer look at each project's scope."
+            text="Click any photo to view it larger."
           />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {projectDetails.map((project, index) => (
-              <Reveal key={project.title} delay={index * 0.04}>
-                <TiltCard className="glass-panel h-full rounded-[24px] p-6">
-                  <h3 className="text-2xl font-bold text-white">{project.title}</h3>
-                  <p className="mt-3 text-base leading-7 text-muted">{project.detail}</p>
-                </TiltCard>
-              </Reveal>
+
+          <div className="mt-10 space-y-16">
+            {projectGalleries.map((group) => (
+              <div key={group.category}>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">
+                  {group.category}
+                </h3>
+                <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {group.projects.map((project, index) => (
+                    <Reveal key={project.title} delay={index * 0.04}>
+                      <ProjectGalleryCard project={project} />
+                    </Reveal>
+                  ))}
+                </div>
+              </div>
             ))}
+          </div>
+
+          <div className="mt-16">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">
+              Extra Projects
+            </h3>
+            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {additionalProjects.map((project, index) => (
+                <Reveal key={project.title} delay={index * 0.04}>
+                  <TiltCard className="glass-panel h-full overflow-hidden rounded-[24px]">
+                    <div className="relative aspect-[4/3] w-full overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={project.image} alt={project.title} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="p-6">
+                      <h4 className="text-2xl font-bold text-white">{project.title}</h4>
+                      <p className="mt-3 text-base leading-7 text-muted">{project.detail}</p>
+                    </div>
+                  </TiltCard>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>
