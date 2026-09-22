@@ -36,23 +36,12 @@ export default function ContactPage() {
     <PageShell>
       <SkipToRail
         items={[
-          { label: "Overview", href: "#contact-overview" },
           { label: "Inquiry Form", href: "#contact-form" },
           { label: "Details", href: "#contact-details" }
         ]}
       />
 
-      <section id="contact-overview" className="section-space">
-        <div className="container-shell">
-          <SectionHeading
-            kicker="Contact"
-            title="A dedicated contact page designed for fast and comfortable inquiry."
-            text="Share your project details and the Monricher team will respond with clear next steps."
-          />
-        </div>
-      </section>
-
-      <section id="contact-form" className="section-space bg-white/[0.02]">
+      <section id="contact-form" className="section-space bg-white/[0.02] pt-28 md:pt-36">
         <div className="container-shell grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <SectionHeading
             kicker="Inquiry Form"
