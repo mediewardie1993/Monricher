@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ScrollScrubVideo } from "@/components/scroll-scrub-video";
 import { withBasePath } from "@/lib/base-path";
 
@@ -37,6 +37,22 @@ const STOPS: Stop[] = [
 ];
 
 const STOP_TIMES = STOPS.map((_, index) => (index / (STOPS.length - 1)) * TOTAL_DURATION);
+
+// Text now waits before appearing, landing closer to the end of each
+// stop's (5s) video transition instead of fading in the instant the stop
+// becomes active — matches framer-motion's `ease: "easeOut"` tween
+// duration in scroll-scrub-video.tsx. No delay on the way out, so the
+// outgoing stop's text clears immediately once the user moves on.
+const TEXT_APPEAR_DELAY_MS = 3200;
+const TEXT_FADE_DURATION_MS = 700;
+
+function fadeStyle(isActive: boolean): CSSProperties {
+  return {
+    opacity: isActive ? 1 : 0,
+    transitionDelay: isActive ? `${TEXT_APPEAR_DELAY_MS}ms` : "0ms",
+    transitionDuration: `${TEXT_FADE_DURATION_MS}ms`
+  };
+}
 
 export function HeroSection() {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -100,10 +116,10 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* The actual scroll-snap container — five full-screen panels, each
-          holding only that stop's text. `scroll-snap-stop: always` stops a
-          fast fling from skipping past a stop; once the last (or first)
-          panel is exhausted, scroll naturally bubbles to the page itself. */}
+      {/* The actual scroll-snap container — one full-screen panel per stop,
+          each holding only that stop's text. `scroll-snap-stop: always`
+          stops a fast fling from skipping past a stop; once the last (or
+          first) panel is exhausted, scroll naturally bubbles to the page. */}
       <div
         ref={scrollerRef}
         className="relative z-10 h-full snap-y snap-mandatory overflow-y-scroll [scroll-snap-stop:always] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
@@ -117,10 +133,7 @@ export function HeroSection() {
             className="container-shell flex h-full snap-start flex-col items-center justify-center pb-14 pt-4 text-center md:pb-28 md:pt-10"
           >
             {stop.kind === "brand" ? (
-              <div
-                className="flex flex-col items-center transition-opacity duration-700"
-                style={{ opacity: activeStop === 0 ? 1 : 0 }}
-              >
+              <div className="flex flex-col items-center transition-opacity" style={fadeStyle(activeStop === 0)}>
                 <div className="relative h-20 w-20 sm:h-24 sm:w-24">
                   <Image
                     src={withBasePath("/logo-icon.png")}
@@ -138,10 +151,7 @@ export function HeroSection() {
             ) : null}
 
             {stop.kind === "text" ? (
-              <div
-                className="max-w-[41rem] text-left transition-opacity duration-700"
-                style={{ opacity: activeStop === index ? 1 : 0 }}
-              >
+              <div className="max-w-[41rem] text-left transition-opacity" style={fadeStyle(activeStop === index)}>
                 <span className="mb-5 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
                   {stop.kicker}
                 </span>
@@ -157,10 +167,7 @@ export function HeroSection() {
             ) : null}
 
             {stop.kind === "cta" ? (
-              <div
-                className="flex flex-col items-center transition-opacity duration-700"
-                style={{ opacity: activeStop === index ? 1 : 0 }}
-              >
+              <div className="flex flex-col items-center transition-opacity" style={fadeStyle(activeStop === index)}>
                 <span className="mb-6 inline-flex text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-white/70">
                   Ready when you are
                 </span>
@@ -181,20 +188,6 @@ export function HeroSection() {
               </div>
             ) : null}
           </div>
-        ))}
-      </div>
-
-      {/* Discrete stop indicator, replacing the old continuous progress bar.
-          Fixed to the viewport (not the section) since the sticky header
-          above pushes this section's own box below viewport height. */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-center gap-2" aria-hidden="true">
-        {STOPS.map((_, index) => (
-          <div
-            key={index}
-            className={`h-[3px] w-9 rounded-full transition-colors duration-300 ${
-              index === activeStop ? "bg-accent" : "bg-white/15"
-            }`}
-          />
         ))}
       </div>
     </section>
