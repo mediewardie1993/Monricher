@@ -2,6 +2,7 @@ import { LagImageWindow } from "@/components/lag-image-window";
 import { PageShell } from "@/components/page-shell";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
+import { ServiceCard } from "@/components/service-card";
 import { SkipToRail } from "@/components/skip-to-rail";
 import { TiltCard } from "@/components/tilt-card";
 import { serviceItems } from "@/lib/site-data";
@@ -33,23 +34,7 @@ export default function ServicesPage() {
         <div className="container-shell">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {serviceItems.map((item, index) => (
-              <Reveal key={item.title} delay={index * 0.06}>
-                <TiltCard className="glass-panel h-full overflow-hidden rounded-[28px]">
-                  <div
-                    className="photo-grade h-40 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${item.image}')` }}
-                    role="img"
-                    aria-label={item.title}
-                  />
-                  <div className="p-6">
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
-                      {`0${index + 1}`}
-                    </span>
-                    <h3 className="mt-4 text-2xl font-bold leading-tight text-white">{item.title}</h3>
-                    <p className="mt-4 text-base leading-7 text-muted">{item.text}</p>
-                  </div>
-                </TiltCard>
-              </Reveal>
+              <ServiceCard key={item.title} item={item} index={index} />
             ))}
           </div>
         </div>

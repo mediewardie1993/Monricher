@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { PageShell } from "@/components/page-shell";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
@@ -14,6 +14,15 @@ type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [message, setMessage] = useState("");
+
+  // Coming from a "Inquire About This Service" link on the Services page —
+  // prefill the message instead of the Service dropdown, since the dropdown
+  // only has 3 broad categories and can't represent each specific service.
+  useEffect(() => {
+    const service = new URLSearchParams(window.location.search).get("service");
+    if (service) setMessage(`I'm interested in: ${service}\n\n`);
+  }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,6 +36,7 @@ export default function ContactPage() {
     if (ok) {
       setStatus("sent");
       form.reset();
+      setMessage("");
     } else {
       setStatus("error");
     }
@@ -116,6 +126,8 @@ export default function ContactPage() {
                   name="message"
                   required
                   rows={6}
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
                   placeholder="Tell us about your project"
                   className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-base text-white outline-none transition focus:border-accent/50 focus:ring-4 focus:ring-accent/10"
                 />
