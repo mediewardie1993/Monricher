@@ -18,19 +18,18 @@ type ScrollScrubVideoProps = {
   className?: string;
 };
 
-// How fast the video drifts forward entirely on its own, as a fraction of
-// real playback speed — the ambient "it's alive even if you don't touch it"
-// motion the client asked for.
-const AUTOPLAY_RATE = 0.5;
+// No ambient drift — the video only moves in response to scroll.
+const AUTOPLAY_RATE = 0;
 
 // Converts page scroll speed (px/s) into extra playback-rate. Scrolling
 // down adds to the rate (fast-forward), scrolling up subtracts from it —
 // enough to go negative and genuinely rewind on a firm upward scroll.
-const VELOCITY_TO_RATE = 1 / 1400;
+// Tuned on a 1-10 feel scale; ~1/1400 read as a 1-2, this is ~3-4.
+const VELOCITY_TO_RATE = 1 / 480;
 
 // Bounds how much a single instant of scroll can influence the rate, so a
 // violent trackpad fling can't fling the video wildly either direction.
-const MAX_RATE = 3.5;
+const MAX_RATE = 6;
 
 // The spring is what actually delivers "eased in and out": the target time
 // changes continuously (autoplay drift + scroll influence) and the video's
@@ -38,11 +37,12 @@ const MAX_RATE = 3.5;
 const SPRING_CONFIG = { stiffness: 70, damping: 22, mass: 0.7 };
 
 /**
- * Plays a chain of video chapters back on its own at half speed, with
- * scrolling nudging the effective playback rate up (fast-forward) or down
- * past zero (rewind) — eased toward via a spring rather than snapped to a
- * raw scroll-position mapping, so it reads as one continuously moving shot
- * that responds to scroll rather than a slider being dragged.
+ * Scroll-driven video playback: scrolling down sets a positive playback
+ * rate (fast-forward), scrolling up sets a negative one (rewind), and the
+ * video sits still otherwise. The displayed time eases toward that target
+ * via a spring rather than snapping to a raw scroll-position mapping, so it
+ * reads as one continuously moving shot responding to scroll rather than a
+ * slider being dragged.
  *
  * Browsers won't actually decode+paint a new frame from a `currentTime` seek
  * until the video has genuinely played at least once. The fix is to let it
