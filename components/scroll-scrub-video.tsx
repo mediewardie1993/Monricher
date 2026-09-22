@@ -22,7 +22,7 @@ type ScrollScrubVideoProps = {
 // takes exactly this long regardless of distance — a spring's settle time
 // varies with how far it has to travel, which isn't what "ease in and out,
 // 2 seconds" asks for.
-const TRANSITION_DURATION = 2.5;
+const TRANSITION_DURATION = 5;
 const TRANSITION_EASE = "easeInOut" as const;
 
 /**
