@@ -20,14 +20,13 @@ type ScrollScrubVideoProps = {
 
 // A fixed-duration tween, not a spring, so every stop-to-stop transition
 // takes exactly this long regardless of distance — a spring's settle time
-// varies with how far it has to travel, which isn't what "ease in and out,
-// 2 seconds" asks for.
+// varies with how far it has to travel.
 const TRANSITION_DURATION = 5;
-const TRANSITION_EASE = "easeInOut" as const;
+const TRANSITION_EASE = "easeOut" as const;
 
 /**
  * A video (or chain of chapters) whose `currentTime` eases toward an
- * externally controlled `targetTime` via a fixed-duration ease-in-out tween
+ * externally controlled `targetTime` via a fixed-duration ease-out tween
  * instead of snapping to it — so moving between two target times reads as a
  * smooth eased fast-forward/rewind rather than a hard cut.
  *
