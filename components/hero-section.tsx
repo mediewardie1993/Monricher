@@ -6,22 +6,15 @@ import { ScrollScrubVideo } from "@/components/scroll-scrub-video";
 import { withBasePath } from "@/lib/base-path";
 
 const heroChapters = [
-  { src: "/videos/hero-chapter-1.mp4", poster: "/videos/hero-chapter-1-poster.jpg", duration: 10 },
-  { src: "/videos/hero-chapter-2.mp4", poster: "/videos/hero-chapter-2-poster.jpg", duration: 10 },
-  { src: "/videos/hero-chapter-3.mp4", poster: "/videos/hero-chapter-3-poster.jpg", duration: 10 }
-  // Next chapter goes here once generated, starting from
-  // /videos/hero-chapter-3-lastframe.jpg. Bump SCRUB_SCREENS proportionally
-  // and add another chapterWindow(3, [...]) beat below to keep pacing
-  // consistent — nothing else needs to change, chapterWindow() re-divides
-  // the whole timeline automatically as chapters are added.
+  { src: "/videos/hero-entrance.mp4", poster: "/videos/hero-entrance-poster.jpg", duration: 30 }
 ].map((chapter) => ({ ...chapter, src: withBasePath(chapter.src), poster: withBasePath(chapter.poster) }));
 
-const LAST_FRAME = withBasePath("/videos/hero-chapter-3-lastframe.jpg");
+const LAST_FRAME = withBasePath("/videos/hero-entrance-lastframe.jpg");
 
-// How much extra scroll distance (in viewport heights) the whole story gets
+// How much extra scroll distance (in viewport heights) the whole video gets
 // to play out across, on top of the one screen it's pinned within. Roughly
 // 2.6 screens per 10s of footage keeps scrub sensitivity consistent.
-const SCRUB_SCREENS = 2.6 * heroChapters.length;
+const SCRUB_SCREENS = 2.6 * (heroChapters[0].duration / 10);
 
 // Extra scroll distance, after the video finishes, where the pinned view
 // holds on the last frame with the closing CTA up — so the payoff gets a
@@ -47,44 +40,13 @@ function interpolate(progress: number, input: number[], output: number[]): numbe
   return output[last];
 }
 
-// Maps a window local to one chapter (0–1 across just that chapter) onto
-// the overall 0–1 video progress — so beats stay correctly placed relative
-// to their own footage no matter how many chapters exist in total.
-function chapterWindow(chapterIndex: number, local: number[]): number[] {
-  const width = 1 / heroChapters.length;
-  const start = chapterIndex * width;
-  return local.map((v) => start + v * width);
-}
-
-// One continuous scroll, one story, a run of cued beats instead of a single
-// block of text sitting on screen the whole time. Each fades in only once
-// its shot has had a moment to establish, holds, then clears out before the
-// next beat. Every beat — the chapter headlines and the quick stat flashes
-// between them alike — shares the same low, same-side treatment so it reads
-// as one consistent theme rather than a mix of styles. All of this is
-// normalized against the VIDEO's own scroll range, not the trailing hold —
-// so it's unaffected by how long the hold lasts.
+// Just two beats now: the opening headline, and the closing CTA once the
+// video settles on its last frame. No mid-scroll act boundaries to keep in
+// sync with — one continuous video, one simple fade in and fade out.
 const BEATS = {
-  // Chapter 1 — aerial approach into the logo reveal.
-  beat1Opacity: { input: chapterWindow(0, [0.05, 0.15, 0.45, 0.55]), output: [0, 1, 1, 0] },
-  beat1Y: { input: chapterWindow(0, [0.05, 0.15]), output: [24, 0] },
-  cardAOpacity: { input: chapterWindow(0, [0.62, 0.68, 0.74, 0.8]), output: [0, 1, 1, 0] },
-  cardAY: { input: chapterWindow(0, [0.62, 0.68]), output: [24, 0] },
+  openingOpacity: { input: [0.02, 0.1, 0.85, 0.94], output: [0, 1, 1, 0] },
+  openingY: { input: [0.02, 0.1], output: [24, 0] },
 
-  // Chapter 2 — the multi-site drone reveal.
-  beat2Opacity: { input: chapterWindow(1, [0.1, 0.2, 0.55, 0.65]), output: [0, 1, 1, 0] },
-  beat2Y: { input: chapterWindow(1, [0.1, 0.2]), output: [24, 0] },
-  cardBOpacity: { input: chapterWindow(1, [0.72, 0.78, 0.84, 0.9]), output: [0, 1, 1, 0] },
-  cardBY: { input: chapterWindow(1, [0.72, 0.78]), output: [24, 0] },
-
-  // Chapter 3 — the medical clinic close-in.
-  beat3CaptionOpacity: { input: chapterWindow(2, [0.08, 0.18, 0.55, 0.65]), output: [0, 1, 1, 0] },
-  beat3CaptionY: { input: chapterWindow(2, [0.08, 0.18]), output: [24, 0] },
-  cardCOpacity: { input: chapterWindow(2, [0.7, 0.76, 0.82, 0.88]), output: [0, 1, 1, 0] },
-  cardCY: { input: chapterWindow(2, [0.7, 0.76]), output: [24, 0] },
-
-  // Closing payoff — a single, centered conversion CTA, entering right as
-  // the video settles on its last frame and held through the hold zone.
   finalOpacity: { input: [0.94, 1], output: [0, 1] },
   finalY: { input: [0.94, 1], output: [28, 0] },
   finalScale: { input: [0.94, 1], output: [0.92, 1] }
@@ -99,39 +61,6 @@ function computeBeats(progress: number): BeatValues {
     result[k] = interpolate(progress, [...BEATS[k].input], [...BEATS[k].output]);
   }
   return result;
-}
-
-type TextBeatProps = {
-  opacity: number;
-  y: number;
-  kicker: string;
-  title: string;
-  text?: string;
-};
-
-// Every beat in the story — the opening line, the chapter captions, and the
-// quick stat flashes in between — shares this one treatment: a small
-// uppercase kicker over a bold headline, anchored low on the same side.
-// One consistent look reads as a single story rather than a mix of styles.
-function TextBeat({ opacity, y, kicker, title, text }: TextBeatProps) {
-  return (
-    <div
-      className="pointer-events-none container-shell absolute inset-0 grid h-full items-end pb-16 md:pb-24"
-      style={{ opacity }}
-    >
-      <div className="max-w-[36rem]" style={{ transform: `translateY(${y}px)` }}>
-        <span className="mb-4 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
-          {kicker}
-        </span>
-        <h2 className="max-w-[16ch] text-balance font-display text-[2.2rem] font-semibold leading-[0.98] tracking-[-0.03em] text-white sm:text-[3rem]">
-          {title}
-        </h2>
-        {text ? (
-          <p className="mt-4 max-w-[30rem] text-[0.95rem] leading-7 text-slate-200/92">{text}</p>
-        ) : null}
-      </div>
-    </div>
-  );
 }
 
 export function HeroSection() {
@@ -182,12 +111,13 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Beat 1 — chapter 1 headline */}
+        {/* Opening headline — holds through most of the video, clears out
+            just before the closing CTA takes over. */}
         <div
           className="pointer-events-none container-shell absolute inset-0 grid h-full items-end pb-16 md:pb-24"
-          style={{ opacity: beats.beat1Opacity }}
+          style={{ opacity: beats.openingOpacity }}
         >
-          <div className="max-w-[41rem]" style={{ transform: `translateY(${beats.beat1Y}px)` }}>
+          <div className="max-w-[41rem]" style={{ transform: `translateY(${beats.openingY}px)` }}>
             <span className="mb-5 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
               High quality design and construction for all industries
             </span>
@@ -201,46 +131,6 @@ export function HeroSection() {
             </p>
           </div>
         </div>
-
-        {/* Card A — chapter 1 stat flash */}
-        <TextBeat
-          opacity={beats.cardAOpacity}
-          y={beats.cardAY}
-          kicker="100% Filipino-Owned"
-          title="A proudly Filipino capitalized corporation."
-        />
-
-        {/* Beat 2 — chapter 2 headline */}
-        <TextBeat
-          opacity={beats.beat2Opacity}
-          y={beats.beat2Y}
-          kicker="One team, every site"
-          title="Hospitals, retail, and residences — built across Luzon."
-        />
-
-        {/* Card B — chapter 2 stat flash */}
-        <TextBeat
-          opacity={beats.cardBOpacity}
-          y={beats.cardBY}
-          kicker="10 Core Services"
-          title="From consultation to final electrical fit-out, all under one team."
-        />
-
-        {/* Beat 3 — chapter 3 headline */}
-        <TextBeat
-          opacity={beats.beat3CaptionOpacity}
-          y={beats.beat3CaptionY}
-          kicker="Built for healthcare"
-          title="Trusted for hospitals and medical clinics across Luzon."
-        />
-
-        {/* Card C — chapter 3 stat flash */}
-        <TextBeat
-          opacity={beats.cardCOpacity}
-          y={beats.cardCY}
-          kicker="Certified Professionals"
-          title="Every project meets the highest standards of quality and workmanship."
-        />
 
         {/* Closing payoff — one centered, unmissable conversion CTA */}
         <div
