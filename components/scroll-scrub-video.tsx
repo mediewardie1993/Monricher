@@ -41,7 +41,27 @@ export function ScrollScrubVideo({ containerRef, chapters, fallbackImage, classN
   const durationsRef = useRef<number[]>(chapters.map((chapter) => chapter.duration ?? 10));
   const pendingTimeRef = useRef(0);
   const readyRef = useRef(false);
+  const seekRafRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Scroll can emit several progress updates within a single rendered
+  // frame (fast wheel/trackpad ticks, or the tail of inertial momentum).
+  // Issuing a `currentTime` seek for every one of those queues up multiple
+  // overlapping decodes that can resolve out of order — the video visibly
+  // flickers backward/forward ("vibrates") for a moment even after the
+  // scroll position itself has already settled. Coalescing to at most one
+  // seek per animation frame, using only the latest pending time, fixes
+  // that: the video only ever seeks to where the scroll actually is right
+  // now, never to a stale in-between value.
+  const flushSeek = () => {
+    seekRafRef.current = 0;
+    const video = videoRef.current;
+    if (!video || !readyRef.current) return;
+    // Skip seeks smaller than roughly half a frame at 60fps — not enough
+    // for the browser to paint a different frame, so it's a wasted decode.
+    if (Math.abs(video.currentTime - pendingTimeRef.current) < 0.008) return;
+    video.currentTime = pendingTimeRef.current;
+  };
 
   const applyProgress = (progress: number) => {
     const durations = durationsRef.current;
@@ -58,13 +78,18 @@ export function ScrollScrubVideo({ containerRef, chapters, fallbackImage, classN
     pendingTimeRef.current = elapsed;
     setActiveIndex((current) => (current === index ? current : index));
 
-    const video = videoRef.current;
-    if (video && readyRef.current) {
-      video.currentTime = elapsed;
+    if (!seekRafRef.current) {
+      seekRafRef.current = window.requestAnimationFrame(flushSeek);
     }
   };
 
   useMotionValueEvent(scrollYProgress, "change", applyProgress);
+
+  useEffect(() => {
+    return () => {
+      if (seekRafRef.current) window.cancelAnimationFrame(seekRafRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
