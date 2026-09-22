@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { useMotionValueEvent, useMotionValue, useScroll, useSpring, useVelocity } from "framer-motion";
+import { useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion";
 
 export type ScrubChapter = {
   src: string;
@@ -11,38 +11,31 @@ export type ScrubChapter = {
 };
 
 type ScrollScrubVideoProps = {
-  /** Kept for API compatibility — no longer used to derive a position mapping. */
+  /** The tall scroll container this timeline is mapped across (start..end = 0..1). */
   containerRef: RefObject<HTMLElement | null>;
   chapters: ScrubChapter[];
   fallbackImage: string;
   className?: string;
 };
 
-// No ambient drift — the video only moves in response to scroll.
-const AUTOPLAY_RATE = 0;
-
-// Converts page scroll speed (px/s) into extra playback-rate. Scrolling
-// down adds to the rate (fast-forward), scrolling up subtracts from it —
-// enough to go negative and genuinely rewind on a firm upward scroll.
-// Tuned on a 1-10 feel scale; ~1/1400 read as a 1-2, this is ~3-4.
-const VELOCITY_TO_RATE = 1 / 480;
-
-// Bounds how much a single instant of scroll can influence the rate, so a
-// violent trackpad fling can't fling the video wildly either direction.
-const MAX_RATE = 6;
-
-// The spring is what actually delivers "eased in and out": the target time
-// changes continuously (autoplay drift + scroll influence) and the video's
-// displayed time always eases toward it rather than snapping.
-const SPRING_CONFIG = { stiffness: 70, damping: 22, mass: 0.7 };
+// Spring the displayed time eases toward the scroll-position target with.
+// Higher stiffness / lower damping = snappier and more tightly tied to
+// scroll (closer to an instant 1:1 mapping); lower stiffness / higher
+// damping = more lag, a more pronounced "catching up" feel. This sits
+// around a 3-4/10 sensitivity — visibly eased but still responsive,
+// tuned up from an earlier pass that read as a 1-2.
+const SPRING_CONFIG = { stiffness: 170, damping: 30, mass: 0.5 };
 
 /**
- * Scroll-driven video playback: scrolling down sets a positive playback
- * rate (fast-forward), scrolling up sets a negative one (rewind), and the
- * video sits still otherwise. The displayed time eases toward that target
- * via a spring rather than snapping to a raw scroll-position mapping, so it
- * reads as one continuously moving shot responding to scroll rather than a
- * slider being dragged.
+ * Maps a chain of video chapters onto one continuous scroll-driven timeline:
+ * scrolling down plays the story forward, scrolling up rewinds it — always
+ * anchored to scroll position, so scrolling all the way through the
+ * container is guaranteed to reach the end of the footage (and all the way
+ * back to the start on the way up), no matter how fast or slow. The
+ * *displayed* time eases toward that position-based target via a spring
+ * rather than snapping straight to it, which is what gives the fast-forward
+ * and rewind their smooth accelerate/decelerate feel instead of feeling like
+ * a slider being dragged frame by frame.
  *
  * Browsers won't actually decode+paint a new frame from a `currentTime` seek
  * until the video has genuinely played at least once. The fix is to let it
@@ -54,9 +47,8 @@ const SPRING_CONFIG = { stiffness: 70, damping: 22, mass: 0.7 };
  * itself keeps playing regardless, so the "brief" priming play can end up
  * running to completion before the rAF ever fires to stop it.
  */
-export function ScrollScrubVideo({ chapters, fallbackImage, className = "" }: ScrollScrubVideoProps) {
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
+export function ScrollScrubVideo({ containerRef, chapters, fallbackImage, className = "" }: ScrollScrubVideoProps) {
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const durationsRef = useRef<number[]>(chapters.map((chapter) => chapter.duration ?? 10));
@@ -65,63 +57,18 @@ export function ScrollScrubVideo({ chapters, fallbackImage, className = "" }: Sc
   const pendingTimeRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // The unsprung target time — advances every animation frame by the
-  // autoplay drift plus whatever the current scroll velocity contributes,
-  // clamped to the total runtime.
-  const rawTime = useMotionValue(0);
-  const smoothTime = useSpring(rawTime, SPRING_CONFIG);
-
   const totalDuration = durationsRef.current.reduce((sum, value) => sum + value, 0);
 
-  useEffect(() => {
-    let raf = 0;
-    let lastNow: number | null = null;
-
-    // A throttled/backgrounded tab can leave rAF ticks seconds apart —
-    // resetting on visibility change (rather than just clamping every dt to
-    // something tiny) means a genuinely slow tick still accumulates the
-    // real elapsed time correctly, while only a truly stale gap (tab was
-    // hidden) gets discarded instead of played back as one big jump.
-    const handleVisibility = () => {
-      if (document.hidden) lastNow = null;
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    const tick = (now: number) => {
-      if (lastNow == null) {
-        lastNow = now;
-        raf = window.requestAnimationFrame(tick);
-        return;
-      }
-      const dt = Math.min((now - lastNow) / 1000, 0.5);
-      lastNow = now;
-
-      const velocityContribution = Math.max(
-        -MAX_RATE,
-        Math.min(MAX_RATE, scrollVelocity.get() * VELOCITY_TO_RATE)
-      );
-      const rate = AUTOPLAY_RATE + velocityContribution;
-
-      const total = durationsRef.current.reduce((sum, value) => sum + value, 0);
-      if (total > 0) {
-        const next = Math.max(0, Math.min(total, rawTime.get() + rate * dt));
-        rawTime.set(next);
-      }
-
-      raf = window.requestAnimationFrame(tick);
-    };
-
-    raf = window.requestAnimationFrame(tick);
-    return () => {
-      window.cancelAnimationFrame(raf);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // The scroll-position target, in seconds — 0 at the very start of the
+  // container, totalDuration at the very end. This is the ground truth the
+  // spring always eases toward, so full playback is always exactly bounded
+  // by the actual scroll range.
+  const targetTime = useTransform(scrollYProgress, [0, 1], [0, totalDuration]);
+  const smoothTime = useSpring(targetTime, SPRING_CONFIG);
 
   // Coalesces spring updates to at most one seek per animation frame and
-  // skips sub-frame deltas — the same fix that stopped the video visibly
-  // flickering backward/forward when scroll settles.
+  // skips sub-frame deltas — stops the video visibly flickering
+  // backward/forward from overlapping seeks resolving out of order.
   const flushSeek = () => {
     seekRafRef.current = 0;
     const video = videoRef.current;
