@@ -16,8 +16,8 @@ type Stop =
   | { kind: "text"; kicker: string; title: string; text?: string }
   | { kind: "cta" };
 
-// Five stops, the last one landing exactly at the end of the video. Each
-// scroll gesture moves exactly one stop (enforced natively via CSS
+// Four stops landing exactly at 0:00, 0:10, 0:20 and 0:30 of the video.
+// Each scroll gesture moves exactly one stop (enforced natively via CSS
 // scroll-snap, not custom wheel handling) so a caption never gets caught
 // mid-fade at some arbitrary in-between scroll position.
 const STOPS: Stop[] = [
@@ -32,11 +32,6 @@ const STOPS: Stop[] = [
     kind: "text",
     kicker: "One team, every site",
     title: "Hospitals, retail, and residences — built across Luzon."
-  },
-  {
-    kind: "text",
-    kicker: "Built for healthcare",
-    title: "Trusted for hospitals and medical clinics across Luzon."
   },
   { kind: "cta" }
 ];
