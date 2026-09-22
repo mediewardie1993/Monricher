@@ -20,8 +20,11 @@ type ScrollScrubVideoProps = {
 
 // Higher stiffness / lower damping = snappier and more tightly tied to the
 // target; lower stiffness / higher damping = more lag, a more pronounced
-// "catching up" feel.
-const SPRING_CONFIG = { stiffness: 170, damping: 30, mass: 0.5 };
+// "catching up" feel. Tuned down from a 170/30/0.5 pass that read as a
+// 10-12 on a 1-10 speed scale to something closer to a 3-4 — a slower,
+// smoother glide between stops. Damping ratio kept above 1 (overdamped) so
+// it never overshoots/bounces past the target between discrete stops.
+const SPRING_CONFIG = { stiffness: 45, damping: 16, mass: 0.6 };
 
 /**
  * A video (or chain of chapters) whose `currentTime` eases toward an
