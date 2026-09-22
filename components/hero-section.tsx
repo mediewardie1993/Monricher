@@ -16,10 +16,9 @@ type Stop =
   | { kind: "text"; kicker: string; title: string; text?: string }
   | { kind: "cta" };
 
-// Four stops landing exactly at 0:00, 0:10, 0:20 and 0:30 of the video.
-// Each scroll gesture moves exactly one stop (enforced natively via CSS
-// scroll-snap, not custom wheel handling) so a caption never gets caught
-// mid-fade at some arbitrary in-between scroll position.
+// Four stops. Each scroll gesture moves exactly one stop (enforced
+// natively via CSS scroll-snap, not custom wheel handling) so a caption
+// never gets caught mid-fade at some arbitrary in-between scroll position.
 const STOPS: Stop[] = [
   { kind: "brand" },
   {
@@ -36,7 +35,10 @@ const STOPS: Stop[] = [
   { kind: "cta" }
 ];
 
-const STOP_TIMES = STOPS.map((_, index) => (index / (STOPS.length - 1)) * TOTAL_DURATION);
+// Stop 1 was moved from the evenly-spaced 0:10 to 0:07 — the video's own
+// baked-in logo reveal runs roughly 0:08-0:13, which the headline text was
+// landing right on top of. 0:07 is the last clean frame before it starts.
+const STOP_TIMES = [0, 7, 20, TOTAL_DURATION];
 
 // Text now waits before appearing, landing closer to the end of each
 // stop's (5s) video transition instead of fading in the instant the stop
