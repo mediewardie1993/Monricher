@@ -34,6 +34,15 @@ type PersistedChat = {
 
 const STORAGE_KEY = "monricher-chatbot-state";
 
+// The relative path works when this build is actually running on Vercel
+// (where /api/chat exists). Static exports (Hostinger, GitHub Pages, the
+// portable USB build) have no server at all, so /api/chat 404s there —
+// askAi() falls through to calling the Vercel deployment's copy of the
+// same route directly instead (CORS-enabled specifically for this), so
+// the AI chatbot works the same everywhere without embedding the Groq key
+// client-side. If both fail, the caller falls back to keyword replies.
+const CHAT_API_URLS = [withBasePath("/api/chat"), "https://monricher.vercel.app/api/chat"];
+
 const quickReplySeeds: Record<string, string> = {
   "Our Services": "services",
   "View Projects": "projects",
@@ -273,24 +282,30 @@ export function ConstructionChatbot() {
   };
 
   const askAi = async (conversation: Message[]): Promise<string | null> => {
-    try {
-      const response = await fetch(withBasePath("/api/chat"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: conversation
-            .slice(-10)
-            .map((message) => ({ role: message.role, content: message.content }))
-        })
-      });
+    const payload = JSON.stringify({
+      messages: conversation.slice(-10).map((message) => ({ role: message.role, content: message.content }))
+    });
 
-      if (!response.ok) return null;
+    for (const url of CHAT_API_URLS) {
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload
+        });
+        if (!response.ok) continue;
 
-      const data = (await response.json()) as { reply?: string };
-      return data.reply?.trim() || null;
-    } catch {
-      return null;
+        const data = (await response.json()) as { reply?: string };
+        const reply = data.reply?.trim();
+        if (reply) return reply;
+      } catch {
+        // Try the next URL — e.g. the relative same-origin path 404s on a
+        // static export (no server there at all), so fall through to the
+        // absolute Vercel URL, which does have one.
+      }
     }
+
+    return null;
   };
 
   const handleFaqFlow = async (value: string, conversation: Message[]) => {

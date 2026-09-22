@@ -4,10 +4,27 @@ import { companyInfo, reasons, serviceItems } from "@/lib/site-data";
 // Only reachable on a real Next.js server (Vercel) — the GitHub Pages /
 // Hostinger / USB builds run `output: "export"`, which can't host route
 // handlers at all, so this directory is stripped out before that build
-// (see .github/workflows/deploy.yml). The chatbot component calls this and
-// falls back to its built-in keyword responses if the request fails, so
-// nothing breaks on deployments where this route doesn't exist.
+// (see .github/workflows/deploy.yml). Those static builds instead call
+// THIS deployment's own /api/chat cross-origin (see CHAT_API_URL in
+// construction-chatbot.tsx) rather than embedding the Groq key
+// client-side, which is why CORS is open here rather than same-origin
+// only. The chatbot component falls back to its built-in keyword
+// responses if every attempt fails, so nothing ever breaks outright.
 export const runtime = "edge";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type"
+};
+
+export function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
+function json(body: unknown, status: number) {
+  return NextResponse.json(body, { status, headers: CORS_HEADERS });
+}
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "openai/gpt-oss-20b";
@@ -39,14 +56,14 @@ type ChatMessage = {
 export async function POST(request: Request) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "AI not configured" }, { status: 503 });
+    return json({ error: "AI not configured" }, 503);
   }
 
   let body: { messages?: ChatMessage[] };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    return json({ error: "Invalid request" }, 400);
   }
 
   const history = Array.isArray(body.messages)
@@ -56,7 +73,7 @@ export async function POST(request: Request) {
     : [];
 
   if (history.length === 0) {
-    return NextResponse.json({ error: "No messages" }, { status: 400 });
+    return json({ error: "No messages" }, 400);
   }
 
   try {
@@ -75,18 +92,18 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "Upstream error" }, { status: 502 });
+      return json({ error: "Upstream error" }, 502);
     }
 
     const data = await response.json();
     const reply = data?.choices?.[0]?.message?.content?.trim();
 
     if (!reply) {
-      return NextResponse.json({ error: "Empty response" }, { status: 502 });
+      return json({ error: "Empty response" }, 502);
     }
 
-    return NextResponse.json({ reply });
+    return json({ reply }, 200);
   } catch {
-    return NextResponse.json({ error: "Request failed" }, { status: 502 });
+    return json({ error: "Request failed" }, 502);
   }
 }
