@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useMotionValue, useMotionValueEvent, useSpring } from "framer-motion";
+import { animate, useMotionValue, useMotionValueEvent } from "framer-motion";
 
 export type ScrubChapter = {
   src: string;
@@ -18,19 +18,18 @@ type ScrollScrubVideoProps = {
   className?: string;
 };
 
-// Higher stiffness / lower damping = snappier and more tightly tied to the
-// target; lower stiffness / higher damping = more lag, a more pronounced
-// "catching up" feel. Tuned down from a 170/30/0.5 pass that read as a
-// 10-12 on a 1-10 speed scale to something closer to a 3-4 — a slower,
-// smoother glide between stops. Damping ratio kept above 1 (overdamped) so
-// it never overshoots/bounces past the target between discrete stops.
-const SPRING_CONFIG = { stiffness: 45, damping: 16, mass: 0.6 };
+// A fixed-duration tween, not a spring, so every stop-to-stop transition
+// takes exactly this long regardless of distance — a spring's settle time
+// varies with how far it has to travel, which isn't what "ease in and out,
+// 2 seconds" asks for.
+const TRANSITION_DURATION = 2;
+const TRANSITION_EASE = "easeInOut" as const;
 
 /**
  * A video (or chain of chapters) whose `currentTime` eases toward an
- * externally controlled `targetTime` via a spring, instead of snapping to it
- * — so moving between two target times reads as a smooth eased
- * fast-forward/rewind rather than a hard cut.
+ * externally controlled `targetTime` via a fixed-duration ease-in-out tween
+ * instead of snapping to it — so moving between two target times reads as a
+ * smooth eased fast-forward/rewind rather than a hard cut.
  *
  * Browsers won't actually decode+paint a new frame from a `currentTime` seek
  * until the video has genuinely played at least once. The fix is to let it
@@ -53,13 +52,17 @@ export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, classNam
   const totalDuration = durationsRef.current.reduce((sum, value) => sum + value, 0);
 
   const rawTime = useMotionValue(targetTime);
-  const smoothTime = useSpring(rawTime, SPRING_CONFIG);
 
   useEffect(() => {
-    rawTime.set(targetTime);
-  }, [targetTime, rawTime]);
+    const controls = animate(rawTime, targetTime, {
+      duration: TRANSITION_DURATION,
+      ease: TRANSITION_EASE
+    });
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetTime]);
 
-  // Coalesces spring updates to at most one seek per animation frame and
+  // Coalesces tween updates to at most one seek per animation frame and
   // skips sub-frame deltas — stops the video visibly flickering
   // backward/forward from overlapping seeks resolving out of order.
   const flushSeek = () => {
@@ -70,7 +73,7 @@ export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, classNam
     video.currentTime = pendingTimeRef.current;
   };
 
-  useMotionValueEvent(smoothTime, "change", (elapsedTotal) => {
+  useMotionValueEvent(rawTime, "change", (elapsedTotal) => {
     const durations = durationsRef.current;
     let elapsed = Math.max(0, Math.min(totalDuration, elapsedTotal));
     let index = 0;
