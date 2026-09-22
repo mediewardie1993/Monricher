@@ -21,7 +21,7 @@ type ScrollScrubVideoProps = {
 // A fixed-duration tween, not a spring, so every stop-to-stop transition
 // takes exactly this long regardless of distance — a spring's settle time
 // varies with how far it has to travel.
-const TRANSITION_DURATION = 5;
+const TRANSITION_DURATION = 4;
 const TRANSITION_EASE = "easeOut" as const;
 
 /**

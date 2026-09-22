@@ -43,7 +43,7 @@ const STOP_TIMES = STOPS.map((_, index) => (index / (STOPS.length - 1)) * TOTAL_
 // becomes active — matches framer-motion's `ease: "easeOut"` tween
 // duration in scroll-scrub-video.tsx. No delay on the way out, so the
 // outgoing stop's text clears immediately once the user moves on.
-const TEXT_APPEAR_DELAY_MS = 3200;
+const TEXT_APPEAR_DELAY_MS = 2560;
 const TEXT_FADE_DURATION_MS = 700;
 
 function fadeStyle(isActive: boolean): CSSProperties {
