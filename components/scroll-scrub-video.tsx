@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useMotionValue, useMotionValueEvent, useSpring } from "framer-motion";
 
 export type ScrubChapter = {
   src: string;
@@ -11,31 +11,23 @@ export type ScrubChapter = {
 };
 
 type ScrollScrubVideoProps = {
-  /** The tall scroll container this timeline is mapped across (start..end = 0..1). */
-  containerRef: RefObject<HTMLElement | null>;
   chapters: ScrubChapter[];
+  /** The time (seconds, across all chapters combined) to ease the video toward. */
+  targetTime: number;
   fallbackImage: string;
   className?: string;
 };
 
-// Spring the displayed time eases toward the scroll-position target with.
-// Higher stiffness / lower damping = snappier and more tightly tied to
-// scroll (closer to an instant 1:1 mapping); lower stiffness / higher
-// damping = more lag, a more pronounced "catching up" feel. This sits
-// around a 3-4/10 sensitivity — visibly eased but still responsive,
-// tuned up from an earlier pass that read as a 1-2.
+// Higher stiffness / lower damping = snappier and more tightly tied to the
+// target; lower stiffness / higher damping = more lag, a more pronounced
+// "catching up" feel.
 const SPRING_CONFIG = { stiffness: 170, damping: 30, mass: 0.5 };
 
 /**
- * Maps a chain of video chapters onto one continuous scroll-driven timeline:
- * scrolling down plays the story forward, scrolling up rewinds it — always
- * anchored to scroll position, so scrolling all the way through the
- * container is guaranteed to reach the end of the footage (and all the way
- * back to the start on the way up), no matter how fast or slow. The
- * *displayed* time eases toward that position-based target via a spring
- * rather than snapping straight to it, which is what gives the fast-forward
- * and rewind their smooth accelerate/decelerate feel instead of feeling like
- * a slider being dragged frame by frame.
+ * A video (or chain of chapters) whose `currentTime` eases toward an
+ * externally controlled `targetTime` via a spring, instead of snapping to it
+ * — so moving between two target times reads as a smooth eased
+ * fast-forward/rewind rather than a hard cut.
  *
  * Browsers won't actually decode+paint a new frame from a `currentTime` seek
  * until the video has genuinely played at least once. The fix is to let it
@@ -47,9 +39,7 @@ const SPRING_CONFIG = { stiffness: 170, damping: 30, mass: 0.5 };
  * itself keeps playing regardless, so the "brief" priming play can end up
  * running to completion before the rAF ever fires to stop it.
  */
-export function ScrollScrubVideo({ containerRef, chapters, fallbackImage, className = "" }: ScrollScrubVideoProps) {
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
-
+export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, className = "" }: ScrollScrubVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const durationsRef = useRef<number[]>(chapters.map((chapter) => chapter.duration ?? 10));
   const readyRef = useRef(false);
@@ -59,12 +49,12 @@ export function ScrollScrubVideo({ containerRef, chapters, fallbackImage, classN
 
   const totalDuration = durationsRef.current.reduce((sum, value) => sum + value, 0);
 
-  // The scroll-position target, in seconds — 0 at the very start of the
-  // container, totalDuration at the very end. This is the ground truth the
-  // spring always eases toward, so full playback is always exactly bounded
-  // by the actual scroll range.
-  const targetTime = useTransform(scrollYProgress, [0, 1], [0, totalDuration]);
-  const smoothTime = useSpring(targetTime, SPRING_CONFIG);
+  const rawTime = useMotionValue(targetTime);
+  const smoothTime = useSpring(rawTime, SPRING_CONFIG);
+
+  useEffect(() => {
+    rawTime.set(targetTime);
+  }, [targetTime, rawTime]);
 
   // Coalesces spring updates to at most one seek per animation frame and
   // skips sub-frame deltas — stops the video visibly flickering

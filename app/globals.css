@@ -115,24 +115,6 @@ body {
   animation-play-state: paused;
 }
 
-/* A slow breathing scale for the hero video frame — invisible while frames
-   are actively changing during the scrub, but gives the frozen last frame
-   a quiet, alive quality once the story settles on it for the closing CTA. */
-@keyframes frame-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.018);
-  }
-}
-
-.frame-breathing {
-  animation: frame-breathe 7s ease-in-out infinite;
-  will-change: transform;
-}
-
 @layer components {
   .container-shell {
     @apply mx-auto w-[min(1180px,calc(100%_-_1.5rem))];
