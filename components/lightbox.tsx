@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type LightboxProps = {
   images: string[];
@@ -12,9 +12,12 @@ type LightboxProps = {
 };
 
 export function Lightbox({ images, index, title, onClose, onNavigate }: LightboxProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !document.fullscreenElement) onClose();
       if (images.length > 1 && event.key === "ArrowRight") onNavigate((index + 1) % images.length);
       if (images.length > 1 && event.key === "ArrowLeft") onNavigate((index - 1 + images.length) % images.length);
     }
@@ -26,6 +29,27 @@ export function Lightbox({ images, index, title, onClose, onNavigate }: Lightbox
     };
   }, [index, images.length, onClose, onNavigate]);
 
+  useEffect(() => {
+    function onFullscreenChange() {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      // Leaving fullscreen behind when the lightbox itself closes/unmounts
+      // would strand the browser in fullscreen with nothing to show for it.
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      containerRef.current?.requestFullscreen().catch(() => {});
+    }
+  };
+
   const src = images[index];
   if (!src) return null;
 
@@ -33,16 +57,39 @@ export function Lightbox({ images, index, title, onClose, onNavigate }: Lightbox
     <AnimatePresence>
       <motion.div
         key="lightbox-backdrop"
+        ref={containerRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/92 p-4 backdrop-blur-sm md:p-8"
+        className={`fixed inset-0 z-[100] flex items-center justify-center bg-black backdrop-blur-sm ${
+          isFullscreen ? "p-0" : "bg-black/92 p-4 md:p-8"
+        }`}
         onClick={onClose}
         role="dialog"
         aria-modal="true"
         aria-label={title ? `${title} photo viewer` : "Photo viewer"}
       >
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleFullscreen();
+          }}
+          className="absolute right-[4.25rem] top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:right-[4.75rem] md:top-6"
+          aria-label={isFullscreen ? "Exit fullscreen" : "View fullscreen"}
+        >
+          {isFullscreen ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+              <path d="M9 3v4a2 2 0 0 1-2 2H3M15 3v4a2 2 0 0 0 2 2h4M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3" />
+            </svg>
+          )}
+        </button>
+
         <button
           type="button"
           onClick={(event) => {
@@ -88,17 +135,25 @@ export function Lightbox({ images, index, title, onClose, onNavigate }: Lightbox
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.97 }}
           transition={{ duration: 0.18 }}
-          className="relative max-w-5xl"
+          className={`relative ${isFullscreen ? "flex h-screen w-screen items-center justify-center" : "max-w-5xl"}`}
           onClick={(event) => event.stopPropagation()}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={title ? `${title} photo ${index + 1}` : `Photo ${index + 1}`}
-            className="max-h-[80vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
+            className={
+              isFullscreen
+                ? "max-h-[100vh] max-w-[100vw] w-auto h-auto object-contain"
+                : "max-h-[80vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
+            }
           />
           {title ? (
-            <p className="mt-3 text-center text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+            <p
+              className={`text-center text-xs font-semibold uppercase tracking-[0.18em] text-white/75 ${
+                isFullscreen ? "absolute bottom-4 left-0 right-0" : "mt-3"
+              }`}
+            >
               {title} — {index + 1} / {images.length}
             </p>
           ) : null}
