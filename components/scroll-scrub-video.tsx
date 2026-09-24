@@ -21,7 +21,7 @@ type ScrollScrubVideoProps = {
 // A fixed-duration tween, not a spring, so every stop-to-stop transition
 // takes exactly this long regardless of distance — a spring's settle time
 // varies with how far it has to travel.
-const TRANSITION_DURATION = 4;
+const TRANSITION_DURATION = 2.5;
 const TRANSITION_EASE = "easeOut" as const;
 
 /**
@@ -40,12 +40,21 @@ const TRANSITION_EASE = "easeOut" as const;
  * itself keeps playing regardless, so the "brief" priming play can end up
  * running to completion before the rAF ever fires to stop it.
  */
+// The source footage is 24fps, so it can only ever produce a new decoded
+// frame every ~42ms — asking for a seek on every animation frame (~16ms,
+// 60/sec) requests frames far faster than the video can actually supply
+// them, and those extra requests queue up behind the decoder instead of
+// just being wasted, which is what reads as the whole thing lagging.
+// Matching the seek rate to the real frame rate stops that queueing.
+const MIN_SEEK_INTERVAL_MS = 1000 / 24;
+
 export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, className = "" }: ScrollScrubVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const durationsRef = useRef<number[]>(chapters.map((chapter) => chapter.duration ?? 10));
   const readyRef = useRef(false);
   const seekRafRef = useRef(0);
   const pendingTimeRef = useRef(0);
+  const lastSeekAtRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const totalDuration = durationsRef.current.reduce((sum, value) => sum + value, 0);
@@ -63,13 +72,34 @@ export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, classNam
 
   // Coalesces tween updates to at most one seek per animation frame and
   // skips sub-frame deltas — stops the video visibly flickering
-  // backward/forward from overlapping seeks resolving out of order.
+  // backward/forward from overlapping seeks resolving out of order. Also
+  // throttled to the video's own real frame rate (see
+  // MIN_SEEK_INTERVAL_MS) rather than firing on every rendered frame, so
+  // the decoder never gets more seek requests than it can actually keep
+  // up with — always seeking to the latest pending time once it does run.
   const flushSeek = () => {
     seekRafRef.current = 0;
     const video = videoRef.current;
-    if (!video || !readyRef.current) return;
+    if (!video) return;
+    if (!readyRef.current) {
+      // Priming (see the effect below) hasn't finished yet — the pending
+      // time is still valid, it just can't be applied yet. Keep retrying
+      // instead of dropping it, otherwise a seek requested in this brief
+      // window is lost forever with nothing left to re-trigger it once
+      // priming does finish.
+      seekRafRef.current = window.requestAnimationFrame(flushSeek);
+      return;
+    }
+
+    const now = performance.now();
+    if (now - lastSeekAtRef.current < MIN_SEEK_INTERVAL_MS) {
+      seekRafRef.current = window.requestAnimationFrame(flushSeek);
+      return;
+    }
+
     if (Math.abs(video.currentTime - pendingTimeRef.current) < 0.008) return;
     video.currentTime = pendingTimeRef.current;
+    lastSeekAtRef.current = now;
   };
 
   useMotionValueEvent(rawTime, "change", (elapsedTotal) => {
