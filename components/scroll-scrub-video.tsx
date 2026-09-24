@@ -40,13 +40,13 @@ const TRANSITION_EASE = "easeOut" as const;
  * itself keeps playing regardless, so the "brief" priming play can end up
  * running to completion before the rAF ever fires to stop it.
  */
-// The source footage is 24fps, so it can only ever produce a new decoded
-// frame every ~42ms — asking for a seek on every animation frame (~16ms,
+// The source footage is 30fps, so it can only ever produce a new decoded
+// frame every ~33ms — asking for a seek on every animation frame (~16ms,
 // 60/sec) requests frames far faster than the video can actually supply
 // them, and those extra requests queue up behind the decoder instead of
 // just being wasted, which is what reads as the whole thing lagging.
 // Matching the seek rate to the real frame rate stops that queueing.
-const MIN_SEEK_INTERVAL_MS = 1000 / 24;
+const MIN_SEEK_INTERVAL_MS = 1000 / 30;
 
 export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, className = "" }: ScrollScrubVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
