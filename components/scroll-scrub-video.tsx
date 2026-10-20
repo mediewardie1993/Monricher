@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { animate, useMotionValue, useMotionValueEvent } from "framer-motion";
+import { useMotionValueEvent, type MotionValue } from "framer-motion";
 
 export type ScrubChapter = {
   src: string;
@@ -11,24 +11,27 @@ export type ScrubChapter = {
 };
 
 type ScrollScrubVideoProps = {
+  /** Scroll progress through the whole timeline, 0..1 across all chapters combined. */
+  progress: MotionValue<number>;
   chapters: ScrubChapter[];
-  /** The time (seconds, across all chapters combined) to ease the video toward. */
-  targetTime: number;
   fallbackImage: string;
   className?: string;
 };
 
-// A fixed-duration tween, not a spring, so every stop-to-stop transition
-// takes exactly this long regardless of distance — a spring's settle time
-// varies with how far it has to travel.
-const TRANSITION_DURATION = 2.5;
-const TRANSITION_EASE = "easeOut" as const;
+// The source footage is 30fps, so it can only ever produce a new decoded
+// frame every ~33ms — asking for a seek on every animation frame (~16ms,
+// 60/sec) requests frames far faster than the video can actually supply
+// them, and those extra requests queue up behind the decoder instead of
+// just being wasted, which is what reads as the whole thing lagging.
+// Matching the seek rate to the real frame rate stops that queueing.
+const MIN_SEEK_INTERVAL_MS = 1000 / 30;
 
 /**
- * A video (or chain of chapters) whose `currentTime` eases toward an
- * externally controlled `targetTime` via a fixed-duration ease-out tween
- * instead of snapping to it — so moving between two target times reads as a
- * smooth eased fast-forward/rewind rather than a hard cut.
+ * Maps a chain of video chapters onto one continuous scroll-driven timeline:
+ * scrolling down plays the story forward frame by frame, scrolling up rewinds
+ * it, exactly as far as the scroll position dictates. Adding a chapter is
+ * just appending to the array — the per-chapter boundaries adjust
+ * automatically.
  *
  * Browsers won't actually decode+paint a new frame from a `currentTime` seek
  * until the video has genuinely played at least once. The fix is to let it
@@ -40,15 +43,7 @@ const TRANSITION_EASE = "easeOut" as const;
  * itself keeps playing regardless, so the "brief" priming play can end up
  * running to completion before the rAF ever fires to stop it.
  */
-// The source footage is 30fps, so it can only ever produce a new decoded
-// frame every ~33ms — asking for a seek on every animation frame (~16ms,
-// 60/sec) requests frames far faster than the video can actually supply
-// them, and those extra requests queue up behind the decoder instead of
-// just being wasted, which is what reads as the whole thing lagging.
-// Matching the seek rate to the real frame rate stops that queueing.
-const MIN_SEEK_INTERVAL_MS = 1000 / 30;
-
-export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, className = "" }: ScrollScrubVideoProps) {
+export function ScrollScrubVideo({ progress, chapters, fallbackImage, className = "" }: ScrollScrubVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const durationsRef = useRef<number[]>(chapters.map((chapter) => chapter.duration ?? 10));
   const readyRef = useRef(false);
@@ -57,20 +52,7 @@ export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, classNam
   const lastSeekAtRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const totalDuration = durationsRef.current.reduce((sum, value) => sum + value, 0);
-
-  const rawTime = useMotionValue(targetTime);
-
-  useEffect(() => {
-    const controls = animate(rawTime, targetTime, {
-      duration: TRANSITION_DURATION,
-      ease: TRANSITION_EASE
-    });
-    return () => controls.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetTime]);
-
-  // Coalesces tween updates to at most one seek per animation frame and
+  // Coalesces scroll updates to at most one seek per animation frame and
   // skips sub-frame deltas — stops the video visibly flickering
   // backward/forward from overlapping seeks resolving out of order. Also
   // throttled to the video's own real frame rate (see
@@ -102,9 +84,12 @@ export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, classNam
     lastSeekAtRef.current = now;
   };
 
-  useMotionValueEvent(rawTime, "change", (elapsedTotal) => {
+  const applyProgress = (value: number) => {
     const durations = durationsRef.current;
-    let elapsed = Math.max(0, Math.min(totalDuration, elapsedTotal));
+    const total = durations.reduce((sum, duration) => sum + duration, 0);
+    if (total <= 0) return;
+
+    let elapsed = Math.min(Math.max(value, 0), 1) * total;
     let index = 0;
     for (; index < durations.length - 1; index++) {
       if (elapsed <= durations[index]) break;
@@ -117,7 +102,9 @@ export function ScrollScrubVideo({ chapters, targetTime, fallbackImage, classNam
     if (!seekRafRef.current) {
       seekRafRef.current = window.requestAnimationFrame(flushSeek);
     }
-  });
+  };
+
+  useMotionValueEvent(progress, "change", applyProgress);
 
   useEffect(() => {
     return () => {
