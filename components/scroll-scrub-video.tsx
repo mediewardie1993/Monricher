@@ -50,7 +50,20 @@ export function ScrollScrubVideo({ progress, chapters, fallbackImage, className 
   const seekRafRef = useRef(0);
   const pendingTimeRef = useRef(0);
   const lastSeekAtRef = useRef(0);
+  // True from the moment a seek is requested until the video reports it has
+  // landed (`seeked`). Phones decode seeks one at a time; firing a new seek
+  // while one is still in flight cancels it before it ever paints, so a fast
+  // scroll produces a stream of abandoned seeks and the picture stutters or
+  // freezes. Waiting for each frame to land, then jumping straight to the
+  // *latest* position, always shows something real.
+  const seekingRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const scheduleFlush = () => {
+    if (!seekRafRef.current) {
+      seekRafRef.current = window.requestAnimationFrame(flushSeek);
+    }
+  };
 
   // Coalesces scroll updates to at most one seek per animation frame and
   // skips sub-frame deltas — stops the video visibly flickering
@@ -74,14 +87,29 @@ export function ScrollScrubVideo({ progress, chapters, fallbackImage, className 
     }
 
     const now = performance.now();
+
+    // A seek is still in flight: leave it alone. `onSeeked` below schedules
+    // the next one. (If `seeked` never arrives, stop waiting after 300ms so
+    // the video can't stay stuck.)
+    if (seekingRef.current && now - lastSeekAtRef.current < 300) return;
+
     if (now - lastSeekAtRef.current < MIN_SEEK_INTERVAL_MS) {
       seekRafRef.current = window.requestAnimationFrame(flushSeek);
       return;
     }
 
     if (Math.abs(video.currentTime - pendingTimeRef.current) < 0.008) return;
+    seekingRef.current = true;
     video.currentTime = pendingTimeRef.current;
     lastSeekAtRef.current = now;
+  };
+
+  const handleSeeked = () => {
+    seekingRef.current = false;
+    const video = videoRef.current;
+    if (video && Math.abs(video.currentTime - pendingTimeRef.current) >= 0.008) {
+      scheduleFlush();
+    }
   };
 
   const applyProgress = (value: number) => {
@@ -99,9 +127,7 @@ export function ScrollScrubVideo({ progress, chapters, fallbackImage, className 
     pendingTimeRef.current = elapsed;
     setActiveIndex((current) => (current === index ? current : index));
 
-    if (!seekRafRef.current) {
-      seekRafRef.current = window.requestAnimationFrame(flushSeek);
-    }
+    scheduleFlush();
   };
 
   useMotionValueEvent(progress, "change", applyProgress);
@@ -181,6 +207,7 @@ export function ScrollScrubVideo({ progress, chapters, fallbackImage, className 
       muted
       playsInline
       preload="auto"
+      onSeeked={handleSeeked}
       aria-hidden="true"
     />
   );

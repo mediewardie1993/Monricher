@@ -6,9 +6,17 @@ import { useMotionValueEvent, useScroll, useSpring, useTransform } from "framer-
 import { ScrollScrubVideo } from "@/components/scroll-scrub-video";
 import { withBasePath } from "@/lib/base-path";
 
-const heroChapters = [
-  { src: "/videos/hero-entrance.mp4", poster: "/videos/hero-entrance-poster.jpg", duration: 30 }
-].map((chapter) => ({ ...chapter, src: withBasePath(chapter.src), poster: withBasePath(chapter.poster) }));
+const toChapters = (src: string) => [
+  { src: withBasePath(src), poster: withBasePath("/videos/hero-entrance-poster.jpg"), duration: 30 }
+];
+
+const heroChapters = toChapters("/videos/hero-entrance.mp4");
+
+// Phones get a lighter encode of the same footage: a keyframe every 3 frames
+// and no B-frames, so every scroll-driven seek only has to decode a couple of
+// frames instead of rebuilding a long chain — that's what keeps the scrub
+// smooth on mobile hardware. (It's also ~30% smaller to download.)
+const heroChaptersMobile = toChapters("/videos/hero-entrance-mobile.mp4");
 
 const TOTAL_DURATION = heroChapters.reduce((sum, chapter) => sum + chapter.duration, 0);
 
@@ -72,12 +80,30 @@ function captionStyle(opacity: number) {
   };
 }
 
+// Static starting look for each caption; after mount, scrolling updates them directly.
+const initialCaptions = computeCaptions(0);
+
 const panelClass =
   "container-shell absolute inset-0 flex flex-col items-center justify-center pb-14 pt-4 text-center md:pb-28 md:pt-10";
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const [captions, setCaptions] = useState<Captions>(() => computeCaptions(0));
+  const captionRefs = useRef<Record<CaptionKey, HTMLDivElement | null>>({
+    brand: null,
+    headline: null,
+    sites: null,
+    cta: null
+  });
+
+  // Which encode to use is only known on the client (phone vs. desktop), so
+  // the video mounts after the first render and the poster shows until then —
+  // this way a phone never starts downloading the large desktop file.
+  const [videoChapters, setVideoChapters] = useState<typeof heroChapters | null>(null);
+
+  useEffect(() => {
+    const phone = window.matchMedia("(max-width: 767px), (hover: none)");
+    setVideoChapters(phone.matches ? heroChaptersMobile : heroChapters);
+  }, []);
 
   // The sticky site header sits above this section in normal document flow
   // (it isn't an overlay), so sizing the pinned view to a flat 100vh would
@@ -110,8 +136,19 @@ export function HeroSection() {
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 170, damping: 32, mass: 0.6, restDelta: 0.00005 });
   const videoProgress = useTransform(smoothProgress, (value) => Math.min(1, Math.max(0, value / videoShare)));
 
+  // Captions are written straight to the DOM instead of through React state:
+  // re-rendering the whole hero 60 times a second while scrolling is real
+  // work on a phone's CPU and competes with the video decoder for time.
   useMotionValueEvent(videoProgress, "change", (progress) => {
-    setCaptions(computeCaptions(progress * TOTAL_DURATION));
+    const captions = computeCaptions(progress * TOTAL_DURATION);
+    for (const key in captions) {
+      const element = captionRefs.current[key as CaptionKey];
+      if (!element) continue;
+      const style = captionStyle(captions[key as CaptionKey]);
+      element.style.opacity = String(style.opacity);
+      element.style.transform = style.transform;
+      element.style.pointerEvents = style.pointerEvents;
+    }
   });
 
   const screen = `(100svh - ${headerHeight}px)`;
@@ -122,7 +159,14 @@ export function HeroSection() {
         {/* Persistent background layer — the video and its overlays stay
             pinned while the scroll distance below plays it out. */}
         <div className="absolute inset-0" aria-hidden="true">
-          <ScrollScrubVideo progress={videoProgress} chapters={heroChapters} fallbackImage={heroChapters[0].poster} />
+          {videoChapters ? (
+            <ScrollScrubVideo progress={videoProgress} chapters={videoChapters} fallbackImage={heroChapters[0].poster} />
+          ) : (
+            <div
+              className="photo-grade absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url('${heroChapters[0].poster}')` }}
+            />
+          )}
 
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(72,130,227,0.22),transparent_28%)]" />
@@ -135,7 +179,7 @@ export function HeroSection() {
         </div>
 
         {/* Opening brand intro */}
-        <div className={`${panelClass} pointer-events-none`} style={captionStyle(captions.brand)}>
+        <div ref={(node) => { captionRefs.current.brand = node; }} className={`${panelClass} pointer-events-none`} style={captionStyle(initialCaptions.brand)}>
           <div className="relative h-20 w-20 sm:h-24 sm:w-24">
             <Image src={withBasePath("/logo-icon.png")} alt="" fill sizes="96px" className="object-contain" priority />
           </div>
@@ -145,7 +189,7 @@ export function HeroSection() {
         </div>
 
         {/* Opening headline */}
-        <div className={`${panelClass} pointer-events-none`} style={captionStyle(captions.headline)}>
+        <div ref={(node) => { captionRefs.current.headline = node; }} className={`${panelClass} pointer-events-none`} style={captionStyle(initialCaptions.headline)}>
           <div className="max-w-[41rem] text-left">
             <span className="mb-5 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
               High quality design and construction for all industries
@@ -161,7 +205,7 @@ export function HeroSection() {
         </div>
 
         {/* Mid-story beat */}
-        <div className={`${panelClass} pointer-events-none`} style={captionStyle(captions.sites)}>
+        <div ref={(node) => { captionRefs.current.sites = node; }} className={`${panelClass} pointer-events-none`} style={captionStyle(initialCaptions.sites)}>
           <div className="max-w-[41rem] text-left">
             <span className="mb-5 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
               One team, every site
@@ -173,7 +217,7 @@ export function HeroSection() {
         </div>
 
         {/* Closing payoff — one centered, unmissable conversion CTA */}
-        <div className={panelClass} style={captionStyle(captions.cta)}>
+        <div ref={(node) => { captionRefs.current.cta = node; }} className={panelClass} style={captionStyle(initialCaptions.cta)}>
           <span className="mb-6 inline-flex text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-white/70">
             Ready when you are
           </span>
