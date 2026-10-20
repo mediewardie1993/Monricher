@@ -114,7 +114,7 @@ export function HeroSection() {
     setCaptions(computeCaptions(progress * TOTAL_DURATION));
   });
 
-  const screen = `(100vh - ${headerHeight}px)`;
+  const screen = `(100svh - ${headerHeight}px)`;
 
   return (
     <section ref={sectionRef} className="relative" style={{ height: `calc(${screen} * ${1 + SCRUB_SCREENS + HOLD_SCREENS})` }}>

@@ -423,7 +423,7 @@ export function ConstructionChatbot() {
                 </div>
               </div>
 
-              <div className="max-h-[min(48vh,24rem)] overflow-y-auto px-3 py-4 sm:max-h-[26rem] sm:px-4">
+              <div className="max-h-[min(48dvh,24rem)] overflow-y-auto px-3 py-4 sm:max-h-[26rem] sm:px-4">
                 <div className="space-y-3">
                   {messages.map((message) => (
                     <article
@@ -506,7 +506,7 @@ export function ConstructionChatbot() {
                         ? "Type your answer here"
                         : "Ask about services, timelines, service areas, or request a quote"
                     }
-                    className="max-h-32 min-h-[3.25rem] flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-[0.95rem] text-white outline-none transition placeholder:text-slate-500 focus:border-[#c8a16b]/60 focus:ring-2 focus:ring-[#c8a16b]/15"
+                    className="max-h-32 min-h-[3.25rem] flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-[#c8a16b]/60 focus:ring-2 focus:ring-[#c8a16b]/15"
                     aria-describedby="monricher-chat-disclaimer"
                   />
                   <button

@@ -60,6 +60,16 @@ body {
   animation: grain-shift 1.4s steps(4) infinite;
 }
 
+/* The animated, blend-moded grain forces a full-screen repaint every few
+   frames — noticeable battery and scroll cost on phones, especially on top
+   of the scroll-scrubbed hero video — and is nearly invisible at that size.
+   Keep it for pointer devices only. */
+@media (hover: none), (max-width: 767px) {
+  .cinematic-grain {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

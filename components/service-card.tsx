@@ -86,7 +86,7 @@ export function ServiceCard({ item, index }: ServiceCardProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.2 }}
-              className="glass-panel max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[28px]"
+              className="glass-panel max-h-[85dvh] w-full max-w-2xl overflow-y-auto rounded-[28px]"
               onClick={(event) => event.stopPropagation()}
             >
               <div

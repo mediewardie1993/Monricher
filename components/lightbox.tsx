@@ -144,8 +144,8 @@ export function Lightbox({ images, index, title, onClose, onNavigate }: Lightbox
             alt={title ? `${title} photo ${index + 1}` : `Photo ${index + 1}`}
             className={
               isFullscreen
-                ? "max-h-[100vh] max-w-[100vw] w-auto h-auto object-contain"
-                : "max-h-[80vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
+                ? "max-h-[100dvh] max-w-[100vw] w-auto h-auto object-contain"
+                : "max-h-[80dvh] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
             }
           />
           {title ? (

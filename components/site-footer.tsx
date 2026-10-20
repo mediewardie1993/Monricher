@@ -6,7 +6,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.08))] py-14">
       <div className="container-shell">
-        <div className="relative mb-10 grid gap-8 overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] p-8 shadow-soft lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <div className="relative mb-10 grid gap-8 overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] p-6 shadow-soft sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div className="space-y-4">
             <p className="section-kicker">Monricher Construction</p>
             <h2 className="max-w-xl text-3xl font-bold leading-tight text-white md:text-4xl">
@@ -36,7 +36,7 @@ export function SiteFooter() {
           </div>
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-200">Quick Links</h3>
-            <div className="grid gap-2 text-sm text-muted">
+            <div className="grid gap-1 text-sm text-muted [&>a]:py-1.5">
               <a href={withBasePath("/")}>Home</a>
               <a href={withBasePath("/about")}>About</a>
               <a href={withBasePath("/projects")}>Projects</a>
@@ -46,7 +46,7 @@ export function SiteFooter() {
           </div>
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-200">Contact</h3>
-            <div className="grid gap-2 text-sm text-muted">
+            <div className="grid gap-1 text-sm text-muted [&>a]:py-1.5">
               <p>{companyInfo.phone}</p>
               <p>{companyInfo.email}</p>
               <p>{companyInfo.address}</p>
@@ -54,7 +54,7 @@ export function SiteFooter() {
           </div>
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-200">Follow Us</h3>
-            <div className="grid gap-2 text-sm text-muted">
+            <div className="grid gap-1 text-sm text-muted [&>a]:py-1.5">
               <a href={companyInfo.facebookUrl} target="_blank" rel="noopener noreferrer">
                 {companyInfo.facebook}
               </a>
