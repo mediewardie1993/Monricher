@@ -54,7 +54,9 @@ type Window = [number, number, number, number];
 const WINDOWS = {
   brand: [0, 0, 2.5, 4],
   headline: [4.5, 6, 7.2, 8.2],
+  filipino: [13.4, 14.4, 16.2, 17],
   sites: [17.5, 19, 21.5, 23],
+  healthcare: [23.2, 24, 25.4, 26.2],
   cta: [26.5, 29, TOTAL_DURATION + 1, TOTAL_DURATION + 2]
 } as const satisfies Record<string, Window>;
 
@@ -91,7 +93,9 @@ export function HeroSection() {
   const captionRefs = useRef<Record<CaptionKey, HTMLDivElement | null>>({
     brand: null,
     headline: null,
+    filipino: null,
     sites: null,
+    healthcare: null,
     cta: null
   });
 
@@ -204,6 +208,18 @@ export function HeroSection() {
           </div>
         </div>
 
+        {/* Ownership beat — lands in the stretch after the baked-in logo reveal */}
+        <div ref={(node) => { captionRefs.current.filipino = node; }} className={`${panelClass} pointer-events-none`} style={captionStyle(initialCaptions.filipino)}>
+          <div className="max-w-[41rem] text-left">
+            <span className="mb-5 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
+              100% Filipino-Owned
+            </span>
+            <h2 className="max-w-[16ch] text-balance font-display text-[2.4rem] font-semibold leading-[0.98] tracking-[-0.03em] text-white sm:text-[3.4rem]">
+              A proudly Filipino capitalized corporation.
+            </h2>
+          </div>
+        </div>
+
         {/* Mid-story beat */}
         <div ref={(node) => { captionRefs.current.sites = node; }} className={`${panelClass} pointer-events-none`} style={captionStyle(initialCaptions.sites)}>
           <div className="max-w-[41rem] text-left">
@@ -212,6 +228,18 @@ export function HeroSection() {
             </span>
             <h2 className="max-w-[16ch] text-balance font-display text-[2.4rem] font-semibold leading-[0.98] tracking-[-0.03em] text-white sm:text-[3.4rem]">
               Hospitals, retail, and residences — built across Luzon.
+            </h2>
+          </div>
+        </div>
+
+        {/* Healthcare beat — leads into the clinic storefront at the end of the footage */}
+        <div ref={(node) => { captionRefs.current.healthcare = node; }} className={`${panelClass} pointer-events-none`} style={captionStyle(initialCaptions.healthcare)}>
+          <div className="max-w-[41rem] text-left">
+            <span className="mb-5 inline-flex text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-white/75 sm:text-[0.68rem]">
+              Built for healthcare
+            </span>
+            <h2 className="max-w-[16ch] text-balance font-display text-[2.4rem] font-semibold leading-[0.98] tracking-[-0.03em] text-white sm:text-[3.4rem]">
+              Trusted for hospitals and medical clinics across Luzon.
             </h2>
           </div>
         </div>
