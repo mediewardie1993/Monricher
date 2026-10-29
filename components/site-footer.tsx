@@ -61,6 +61,10 @@ export function SiteFooter() {
             </div>
           </div>
         </div>
+
+        <p className="mt-10 border-t border-white/8 pt-6 text-center text-xs text-muted">
+          I want a website like this.
+        </p>
       </div>
     </footer>
   );
