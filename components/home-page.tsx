@@ -1,4 +1,8 @@
+import { CompareSlider } from "@/components/compare-slider";
 import { ConstructionChatbot } from "@/components/construction-chatbot";
+import { Reveal } from "@/components/reveal";
+import { SectionHeading } from "@/components/section-heading";
+import { withBasePath } from "@/lib/base-path";
 import { HeroSection } from "@/components/hero-section";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -16,6 +20,30 @@ export function HomePage() {
 
       <main>
         <HeroSection />
+
+        <section className="section-space">
+          <div className="container-shell">
+            <SectionHeading
+              kicker="Bliss Tagaytay"
+              title="From blueprint to built."
+              text="Drag the line to see the plan become the finished project."
+            />
+            <Reveal className="mt-10">
+              <CompareSlider
+                before={{
+                  src: withBasePath("/photos/blueprint-to-build-plan.jpg"),
+                  alt: "Bliss Tagaytay blueprint",
+                  label: "Blueprint"
+                }}
+                after={{
+                  src: withBasePath("/photos/blueprint-to-build-built.jpg"),
+                  alt: "Bliss Tagaytay finished project",
+                  label: "Built"
+                }}
+              />
+            </Reveal>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />
